@@ -1,0 +1,67 @@
+package honkhonk.threadwatch.retrievers;
+
+import android.content.Context;
+
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.google.gson.Gson;
+
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+
+import honkhonk.threadwatch.ThreadWatch;
+import honkhonk.threadwatch.models.PostModel;
+import honkhonk.threadwatch.models.PostsResponse;
+
+/**
+ * Created by Gunbard on 10/11/2016.
+ */
+
+public class PostsRetriever {
+    public ArrayList<PostsRetrieverProtocol> listeners = new ArrayList<>();
+
+    public interface PostsRetrieverProtocol {
+        void postsRetrieved(final String board,
+                            final String threadId,
+                            final ArrayList<PostModel> posts);
+
+        void retrievalFailed();
+    }
+
+    public void addListener(final PostsRetrieverProtocol listener) {
+        listeners.add(listener);
+    }
+
+    public void retrievePosts(final Context context, final String board, final String threadId) {
+        final String url = "https://a.4cdn.org/"+ board + "/thread/" + threadId + ".json";
+
+        final JsonObjectRequest retrieveRequest = new JsonObjectRequest
+                (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        final PostsResponse postsResponse =
+                                (new Gson()).fromJson(response.toString(), PostsResponse.class);
+
+                        for (final PostsRetrieverProtocol listener : listeners) {
+                            if (postsResponse.posts != null) {
+                                listener.postsRetrieved(board, threadId, postsResponse.posts);
+                            } else {
+                                listener.retrievalFailed();
+                            }
+                        }
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        for (final PostsRetrieverProtocol listener : listeners) {
+                            listener.retrievalFailed();
+                        }
+                    }
+                });
+
+        ThreadWatch.getInstance(context).addToRequestQueue(retrieveRequest);
+    }
+}
