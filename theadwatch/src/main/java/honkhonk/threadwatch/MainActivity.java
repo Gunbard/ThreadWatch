@@ -20,22 +20,23 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
-import honkhonk.threadwatch.models.PostModel;
-import honkhonk.threadwatch.retrievers.PostsRetriever;
+import honkhonk.threadwatch.models.ThreadModel;
+import honkhonk.threadwatch.retrievers.ThreadsRetriever;
 
-public class MainActivity extends AppCompatActivity implements PostsRetriever.PostsRetrieverProtocol {
+public class MainActivity extends AppCompatActivity
+        implements ThreadsRetriever.ThreadRetrieverListener {
     final public static String TAG = MainActivity.class.getSimpleName();
 
     private int fadeDuration;
 
     private SwipeRefreshLayout swipeContainer;
 
-    private ArrayList<PostModel> listDataSource = new ArrayList<>();
-    private ArrayAdapter<PostModel> listAdapter;
+    private ArrayList<ThreadModel> listDataSource = new ArrayList<>();
+    private ArrayAdapter<ThreadModel> listAdapter;
 
     private ListView listView;
-
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -47,26 +48,25 @@ public class MainActivity extends AppCompatActivity implements PostsRetriever.Po
 
         listView = (ListView) findViewById(R.id.mainList);
 
-        PostModel post1 = new PostModel();
-        post1.comment = "what";
+        final ArrayList<ThreadModel> threads = createTestThreads();
 
-        PostModel post2 = new PostModel();
-        post2.comment = "sure";
+        listDataSource.add(threads.get(0));
+        listDataSource.add(threads.get(1));
 
-        listDataSource.add(post1);
-        listDataSource.add(post2);
-
-        listAdapter = new ArrayAdapter<PostModel>(this,
+        listAdapter = new ArrayAdapter<ThreadModel>(this,
                 R.layout.thread_item, R.id.threadTitle, listDataSource) {
             @Override
             @NonNull
             public View getView(int position, View convertView, @NonNull ViewGroup parent) {
                 final View view = super.getView(position, convertView, parent);
                 if (position < listDataSource.size()) {
-                    TextView title = (TextView) view.findViewById(R.id.threadTitle);
+                    final ThreadModel thread = listDataSource.get(position);
 
+                    final TextView boardName = (TextView) view.findViewById(R.id.boardTitle);
+                    boardName.setText("/" + thread.board + "/");
 
-                    final String comment = listDataSource.get(position).comment;
+                    final TextView title = (TextView) view.findViewById(R.id.threadTitle);
+                    final String comment = thread.comment;
 
                     if (comment != null && !comment.equals("")) {
                         final String sanitizedComment =
@@ -75,8 +75,10 @@ public class MainActivity extends AppCompatActivity implements PostsRetriever.Po
 
                         title.setText(sanitizedComment);
                     }
-                    //TextView subtitle = (TextView) view.findViewById(android.R.id.text2);
-                    //subtitle.setText("what");
+                    else
+                    {
+                        title.setText("");
+                    }
                 }
                 return view;
             }
@@ -164,17 +166,15 @@ public class MainActivity extends AppCompatActivity implements PostsRetriever.Po
     }
 
     /**
-     * PostsRetrieverProtocol
+     * ThreadRetrieverListener
      */
-    public void postsRetrieved(final String board,
-                               final String threadId,
-                               final ArrayList<PostModel> posts) {
-        updateList(posts);
+    public void threadsRetrieved(final ArrayList<ThreadModel> threads) {
+        updateList(threads);
         swipeContainer.setRefreshing(false);
         listView.animate().alpha(1.0f).setDuration(fadeDuration);
     }
 
-    public void retrievalFailed() {
+    public void threadRetrievalFailed() {
         swipeContainer.setRefreshing(false);
         listView.animate().alpha(1.0f).setDuration(fadeDuration);
     }
@@ -182,9 +182,9 @@ public class MainActivity extends AppCompatActivity implements PostsRetriever.Po
     /**
      * Private methods
      */
-    private void updateList(final ArrayList<PostModel> posts) {
+    private void updateList(final ArrayList<ThreadModel> threads) {
         listDataSource.clear();
-        listDataSource.addAll(posts);
+        listDataSource.addAll(threads);
 
         listAdapter.notifyDataSetChanged();
     }
@@ -194,9 +194,25 @@ public class MainActivity extends AppCompatActivity implements PostsRetriever.Po
         swipeContainer.setRefreshing(true);
         listView.animate().alpha(0.5f).setDuration(fadeDuration);
 
-        PostsRetriever postsRetriever = new PostsRetriever();
+        /*PostsRetriever postsRetriever = new PostsRetriever();
         postsRetriever.addListener(this);
-        postsRetriever.retrievePosts(this, "jp", "15862023");
+        postsRetriever.retrievePosts(this, createTestThreads());*/
+
+        ThreadsRetriever threadsRetriever = new ThreadsRetriever();
+        threadsRetriever.addListener(this);
+        threadsRetriever.retrieveThreadData(this, createTestThreads());
     }
 
+
+    private ArrayList<ThreadModel> createTestThreads() {
+        ThreadModel newThread1 = new ThreadModel();
+        newThread1.board = "jp";
+        newThread1.id = "15862023";
+
+        ThreadModel newThread2 = new ThreadModel();
+        newThread2.board = "cgl";
+        newThread2.id = "9178233";
+
+        return new ArrayList<>(Arrays.asList(newThread1, newThread2));
+    }
 }

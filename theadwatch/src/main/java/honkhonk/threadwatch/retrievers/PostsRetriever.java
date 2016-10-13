@@ -15,28 +15,29 @@ import java.util.ArrayList;
 import honkhonk.threadwatch.ThreadWatch;
 import honkhonk.threadwatch.models.PostModel;
 import honkhonk.threadwatch.models.PostsResponse;
+import honkhonk.threadwatch.models.ThreadModel;
 
 /**
  * Created by Gunbard on 10/11/2016.
  */
 
 public class PostsRetriever {
-    public ArrayList<PostsRetrieverProtocol> listeners = new ArrayList<>();
+    private ArrayList<PostsRetrieverListener> listeners = new ArrayList<>();
 
-    public interface PostsRetrieverProtocol {
-        void postsRetrieved(final String board,
-                            final String threadId,
+    public interface PostsRetrieverListener {
+        void postsRetrieved(final ThreadModel thread,
                             final ArrayList<PostModel> posts);
 
         void retrievalFailed();
     }
 
-    public void addListener(final PostsRetrieverProtocol listener) {
+    public void addListener(final PostsRetrieverListener listener) {
         listeners.add(listener);
     }
 
-    public void retrievePosts(final Context context, final String board, final String threadId) {
-        final String url = "https://a.4cdn.org/"+ board + "/thread/" + threadId + ".json";
+    public void retrievePosts(final Context context, final ThreadModel thread) {
+        final String url =
+                "https://a.4cdn.org/"+ thread.board + "/thread/" + thread.id + ".json";
 
         final JsonObjectRequest retrieveRequest = new JsonObjectRequest
                 (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
@@ -45,9 +46,9 @@ public class PostsRetriever {
                         final PostsResponse postsResponse =
                                 (new Gson()).fromJson(response.toString(), PostsResponse.class);
 
-                        for (final PostsRetrieverProtocol listener : listeners) {
+                        for (final PostsRetrieverListener listener : listeners) {
                             if (postsResponse.posts != null) {
-                                listener.postsRetrieved(board, threadId, postsResponse.posts);
+                                listener.postsRetrieved(thread, postsResponse.posts);
                             } else {
                                 listener.retrievalFailed();
                             }
@@ -56,7 +57,7 @@ public class PostsRetriever {
                 }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        for (final PostsRetrieverProtocol listener : listeners) {
+                        for (final PostsRetrieverListener listener : listeners) {
                             listener.retrievalFailed();
                         }
                     }
