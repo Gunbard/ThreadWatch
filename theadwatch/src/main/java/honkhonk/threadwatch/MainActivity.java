@@ -122,10 +122,7 @@ public class MainActivity extends AppCompatActivity
         });
 
         // Configure the refreshing colors
-        swipeContainer.setColorSchemeResources(android.R.color.holo_blue_bright,
-                android.R.color.holo_green_light,
-                android.R.color.holo_orange_light,
-                android.R.color.holo_red_light);
+        swipeContainer.setColorSchemeResources(android.R.color.holo_green_dark);
 
         refresh();
     }
@@ -255,17 +252,30 @@ public class MainActivity extends AppCompatActivity
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(final DialogInterface dialog, final int which) {
-                Toast.makeText(MainActivity.this, "Added: " + input.getText(),
-                        Toast.LENGTH_SHORT).show();
-
+                final String errorMessage = "Not a valid thread url";
                 final Uri url = Uri.parse(input.getText().toString());
+                if (url.getAuthority() == null || !url.getAuthority().equals("boards.4chan.org")) {
+                    Toast.makeText(MainActivity.this, errorMessage,
+                            Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 final String[] pathParts = url.getPath().split("/");
+                if (pathParts.length < 4 || pathParts[1] == null || pathParts[3] == null) {
+                    Toast.makeText(MainActivity.this, errorMessage,
+                            Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
                 ThreadModel newThread = new ThreadModel();
                 newThread.board = pathParts[1];
                 newThread.id = pathParts[3];
 
                 listDataSource.add(newThread);
+
+                Toast.makeText(MainActivity.this, "Added " + input.getText(),
+                        Toast.LENGTH_SHORT).show();
+
                 refresh();
             }
         });
