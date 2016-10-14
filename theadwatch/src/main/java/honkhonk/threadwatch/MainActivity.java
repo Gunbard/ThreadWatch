@@ -4,10 +4,13 @@ import android.app.AlarmManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.NotificationCompat;
 import android.view.Menu;
@@ -15,9 +18,12 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -86,6 +92,25 @@ public class MainActivity extends AppCompatActivity
 
         listView.setAdapter(listAdapter);
 
+        final AdapterView.OnItemClickListener mMessageClickedHandler =
+                new AdapterView.OnItemClickListener() {
+            public void onItemClick(final AdapterView parent,
+                                    final View view,
+                                    final int position,
+                                    long id) {
+                final ThreadModel thread = listDataSource.get(position);
+                final String url = thread.getUrl();
+
+                if (url != null) {
+                    final Intent browserIntent =
+                            new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                    startActivity(browserIntent);
+                }
+            }
+        };
+
+        listView.setOnItemClickListener(mMessageClickedHandler);
+
         swipeContainer = (SwipeRefreshLayout) findViewById(R.id.swipeContainer);
 
         // Setup refresh listener which triggers new data loading
@@ -114,8 +139,11 @@ public class MainActivity extends AppCompatActivity
     public boolean onOptionsItemSelected(final MenuItem item) {
         // Handle item selection
         switch (item.getItemId()) {
-            case R.id.menu_wat:
+            case R.id.menu_refresh:
                 refresh();
+                return true;
+            case R.id.menu_add:
+                addThread();
                 return true;
             case R.id.menu_settings:
                 final Intent settingsIntent = new Intent(this, SettingsActivity.class);
@@ -203,7 +231,6 @@ public class MainActivity extends AppCompatActivity
         threadsRetriever.retrieveThreadData(this, createTestThreads());
     }
 
-
     private ArrayList<ThreadModel> createTestThreads() {
         ThreadModel newThread1 = new ThreadModel();
         newThread1.board = "jp";
@@ -214,5 +241,28 @@ public class MainActivity extends AppCompatActivity
         newThread2.id = "9178233";
 
         return new ArrayList<>(Arrays.asList(newThread1, newThread2));
+    }
+
+    private void addThread() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.add_thread_dialog_title);
+
+        final EditText input = new EditText(this);
+        input.setHint(R.string.add_thread_dialog_input_hint);
+
+        final int viewPadding =
+                getResources().getDimensionPixelSize(R.dimen.add_thread_input_padding);
+
+        builder.setView(input, viewPadding, 0, viewPadding, 0);
+
+        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(final DialogInterface dialog, final int which) {
+                Toast.makeText(MainActivity.this, "Entered: " + input.getText(),
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        builder.create().show();
     }
 }

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item
-        android:id="@+id/menu_refresh"
+    <item android:id="@+id/menu_refresh"
         android:icon="@android:drawable/ic_popup_sync"
         android:title="@string/menu_refresh"
+        app:showAsAction="ifRoom" />
+    <item android:id="@+id/menu_add"
+        android:icon="@android:drawable/ic_menu_add"
+        android:title="@string/menu_add"
         app:showAsAction="ifRoom"/>
-
-    <item android:id="@+id/menu_wat"
-        android:title="wat" />
     <item android:id="@+id/menu_settings"
         android:icon="@android:drawable/ic_menu_preferences"
         android:title="@string/menu_settings" />
