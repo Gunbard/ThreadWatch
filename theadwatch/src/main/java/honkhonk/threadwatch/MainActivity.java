@@ -13,6 +13,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.NotificationCompat;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -111,6 +112,9 @@ public class MainActivity extends AppCompatActivity
 
         listView.setOnItemClickListener(mMessageClickedHandler);
 
+        // Show the thread action menu on long click
+        registerForContextMenu(listView);
+
         swipeContainer = (SwipeRefreshLayout) findViewById(R.id.swipeContainer);
 
         // Setup refresh listener which triggers new data loading
@@ -142,7 +146,7 @@ public class MainActivity extends AppCompatActivity
                 refresh();
                 return true;
             case R.id.menu_add:
-                addThread();
+                showAddThreadDialog();
                 return true;
             case R.id.menu_settings:
                 final Intent settingsIntent = new Intent(this, SettingsActivity.class);
@@ -155,6 +159,14 @@ public class MainActivity extends AppCompatActivity
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v,
+                                    ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.thread_action_menu, menu);
     }
 
     // Setup a recurring alarm every half hour
@@ -171,6 +183,19 @@ public class MainActivity extends AppCompatActivity
 
          alarm.setInexactRepeating(AlarmManager.RTC_WAKEUP, firstMillis,
                 AlarmManager.INTERVAL_HALF_HOUR, pendingIntent);
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        final AdapterView.AdapterContextMenuInfo info =
+                (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        switch (item.getItemId()) {
+            case R.id.thread_menu_delete:
+                deleteThread(info.position);
+                return true;
+            default:
+                return super.onContextItemSelected(item);
+        }
     }
 
     public void bleh(final View v) {
@@ -237,7 +262,7 @@ public class MainActivity extends AppCompatActivity
         return new ArrayList<>(Arrays.asList(newThread1, newThread2));
     }
 
-    private void addThread() {
+    private void showAddThreadDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.add_thread_dialog_title);
 
@@ -281,5 +306,10 @@ public class MainActivity extends AppCompatActivity
         });
 
         builder.create().show();
+    }
+
+    private void deleteThread(final int position) {
+        listDataSource.remove(position);
+        listAdapter.notifyDataSetChanged();
     }
 }

@@ -9,6 +9,8 @@
     <string name="add_thread_dialog_title">Add Thread</string>>
     <string name="add_thread_dialog_input_hint">Paste a thread url</string>>
 
+    <string name="thread_menu_delete">Delete</string>>
+
     <string name="title_activity_settings">Settings</string>
 
     <!-- Strings related to Settings -->
