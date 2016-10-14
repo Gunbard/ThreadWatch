@@ -25,7 +25,8 @@ public class PostsRetriever {
     private ArrayList<PostsRetrieverListener> listeners = new ArrayList<>();
 
     public interface PostsRetrieverListener {
-        void postsRetrieved(final ThreadModel thread,
+        void postsRetrieved(final Context context,
+                            final ThreadModel thread,
                             final ArrayList<PostModel> posts);
 
         void retrievalFailed();
@@ -48,7 +49,7 @@ public class PostsRetriever {
 
                         for (final PostsRetrieverListener listener : listeners) {
                             if (postsResponse.posts != null) {
-                                listener.postsRetrieved(thread, postsResponse.posts);
+                                listener.postsRetrieved(context, thread, postsResponse.posts);
                             } else {
                                 listener.retrievalFailed();
                             }

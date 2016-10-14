@@ -126,6 +126,8 @@ public class MainActivity extends AppCompatActivity
                 android.R.color.holo_green_light,
                 android.R.color.holo_orange_light,
                 android.R.color.holo_red_light);
+
+        refresh();
     }
 
     @Override
@@ -213,7 +215,6 @@ public class MainActivity extends AppCompatActivity
     private void updateList(final ArrayList<ThreadModel> threads) {
         listDataSource.clear();
         listDataSource.addAll(threads);
-
         listAdapter.notifyDataSetChanged();
     }
 
@@ -222,13 +223,9 @@ public class MainActivity extends AppCompatActivity
         swipeContainer.setRefreshing(true);
         listView.animate().alpha(0.5f).setDuration(fadeDuration);
 
-        /*PostsRetriever postsRetriever = new PostsRetriever();
-        postsRetriever.addListener(this);
-        postsRetriever.retrievePosts(this, createTestThreads());*/
-
         ThreadsRetriever threadsRetriever = new ThreadsRetriever();
         threadsRetriever.addListener(this);
-        threadsRetriever.retrieveThreadData(this, createTestThreads());
+        threadsRetriever.retrieveThreadData(this, listDataSource);
     }
 
     private ArrayList<ThreadModel> createTestThreads() {
@@ -258,8 +255,18 @@ public class MainActivity extends AppCompatActivity
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(final DialogInterface dialog, final int which) {
-                Toast.makeText(MainActivity.this, "Entered: " + input.getText(),
+                Toast.makeText(MainActivity.this, "Added: " + input.getText(),
                         Toast.LENGTH_SHORT).show();
+
+                final Uri url = Uri.parse(input.getText().toString());
+                final String[] pathParts = url.getPath().split("/");
+
+                ThreadModel newThread = new ThreadModel();
+                newThread.board = pathParts[1];
+                newThread.id = pathParts[3];
+
+                listDataSource.add(newThread);
+                refresh();
             }
         });
 

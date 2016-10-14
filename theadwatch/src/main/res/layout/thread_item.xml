@@ -1,41 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
 
-    <RelativeLayout
+
+<RelativeLayout android:layout_width="match_parent"
+    android:layout_height="64dp"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:id="@+id/boardTitle"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:textSize="24sp"
+        android:gravity="center"
+        android:padding="8dp"
+        android:layout_alignParentEnd="false"
+        android:layout_alignParentLeft="true"
+        android:text="/vr/" />
+
+    <TextView
         android:layout_width="match_parent"
-        android:layout_height="64dp">
+        android:layout_alignParentTop="false"
+        android:id="@+id/threadTitle"
+        android:layout_alignParentEnd="false"
+        android:layout_height="match_parent"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="18sp"
+        android:layout_centerInParent="false"
+        android:ellipsize="end"
+        android:padding="4dp"
+        android:maxLines="1"
+        android:gravity="left|center_vertical"
+        android:text="Some title"
+        android:layout_toRightOf="@+id/boardTitle" />
 
-        <TextView
-            android:text="TextView"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:id="@+id/boardTitle"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:textSize="24sp"
-            android:layout_alignParentEnd="false"
-            android:layout_alignParentLeft="true"
-            android:gravity="center"
-            android:padding="8dp" />
+</RelativeLayout>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_alignParentTop="true"
-            android:id="@+id/threadTitle"
-            android:layout_alignParentEnd="true"
-            android:layout_height="match_parent"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="18sp"
-            android:layout_centerInParent="false"
-            android:ellipsize="end"
-            android:padding="4dp"
-            android:maxLines="1"
-            android:layout_weight="1.31"
-            android:layout_alignStart="@+id/boardTitle"
-            android:gravity="center" />
-
-    </RelativeLayout>
-
-</FrameLayout>
