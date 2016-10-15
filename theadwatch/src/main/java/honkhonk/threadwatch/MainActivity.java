@@ -52,6 +52,7 @@ public class MainActivity extends AppCompatActivity
 
     // TODO: Move to SharedPrefs
     private int sortMode = 0;
+    private boolean sortAscending = false;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -234,6 +235,10 @@ public class MainActivity extends AppCompatActivity
 
     private void refresh() {
         swipeContainer.setRefreshing(true);
+
+        ThreadSorter.sort(listDataSource, Common.sortOptionsValues[sortMode], sortAscending);
+        listAdapter.notifyDataSetChanged();
+
         listView.animate().alpha(0.5f).setDuration(fadeDuration);
 
         ThreadsRetriever threadsRetriever = new ThreadsRetriever();
@@ -392,7 +397,7 @@ public class MainActivity extends AppCompatActivity
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         builder.setTitle(R.string.menu_sort);
         builder.setSingleChoiceItems(options, sortMode, null);
-        builder.setPositiveButton(R.string.sort_menu_ascend, new DialogInterface.OnClickListener() {
+        builder.setNeutralButton(R.string.sort_menu_ascend, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 final int selectedPosition =
@@ -400,10 +405,11 @@ public class MainActivity extends AppCompatActivity
                 ThreadSorter.sort(listDataSource, Common.sortOptionsValues[selectedPosition], true);
                 listAdapter.notifyDataSetChanged();
                 sortMode = selectedPosition;
+                sortAscending = true;
             }
         });
 
-        builder.setNeutralButton(R.string.sort_menu_descend, new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(R.string.sort_menu_descend, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 final int selectedPosition =
@@ -411,6 +417,7 @@ public class MainActivity extends AppCompatActivity
                 ThreadSorter.sort(listDataSource, Common.sortOptionsValues[selectedPosition], false);
                 listAdapter.notifyDataSetChanged();
                 sortMode = selectedPosition;
+                sortAscending = false;
             }
         });
 
