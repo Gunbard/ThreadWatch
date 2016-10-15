@@ -13,6 +13,8 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.NotificationCompat;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -21,6 +23,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -305,7 +308,30 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        builder.create().show();
+
+        final AlertDialog dialog = builder.create();
+
+        input.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // Stub
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // Stub
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                final Button button = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                button.setEnabled(!(s.toString().trim().length() == 0));
+            }
+        });
+
+        dialog.show();
+        
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
     }
 
     private void deleteThread(final int position) {
