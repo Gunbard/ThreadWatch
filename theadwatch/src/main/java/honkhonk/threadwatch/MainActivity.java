@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
@@ -24,18 +23,17 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import honkhonk.threadwatch.adapters.ThreadListAdapter;
 import honkhonk.threadwatch.models.ThreadModel;
 import honkhonk.threadwatch.retrievers.ThreadsRetriever;
 
@@ -67,29 +65,8 @@ public class MainActivity extends AppCompatActivity
         listDataSource.add(threads.get(0));
         listDataSource.add(threads.get(1));
 
-        listAdapter = new ArrayAdapter<ThreadModel>(this,
-                R.layout.thread_item, R.id.threadTitle, listDataSource) {
-            @Override
-            @NonNull
-            public View getView(int position, View convertView, @NonNull ViewGroup parent) {
-                final View view = super.getView(position, convertView, parent);
-                if (position < listDataSource.size()) {
-                    final ThreadModel thread = listDataSource.get(position);
-
-                    final TextView boardName = (TextView) view.findViewById(R.id.boardTitle);
-                    boardName.setText("/" + thread.board + "/");
-
-                    final TextView title = (TextView) view.findViewById(R.id.threadTitle);
-                    title.setText(thread.getSanitizedComment());
-
-                    if (thread.archived) {
-                        view.setBackgroundColor(Color.LTGRAY);
-                    }
-                }
-                return view;
-            }
-        };
-
+        listAdapter = new ThreadListAdapter(this,
+                R.layout.thread_item, R.id.threadTitle, listDataSource);
         listView.setAdapter(listAdapter);
 
         final AdapterView.OnItemClickListener mMessageClickedHandler =
@@ -361,7 +338,7 @@ public class MainActivity extends AppCompatActivity
         listAdapter.notifyDataSetChanged();
 
         Snackbar.make(findViewById(android.R.id.content),
-            getResources().getString(R.string.thread_menu_deleted) +  ": " + removedThread.comment,
+            getResources().getString(R.string.thread_menu_deleted) +  " " + removedThread.comment,
                 Snackbar.LENGTH_LONG)
             .setAction(R.string.thread_menu_undo, new View.OnClickListener() {
                 @Override
@@ -374,14 +351,35 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void showSortMenu() {
-        final String[] options = {"stuff", "things"};
+        final String[] options = {
+            getResources().getString(R.string.sort_menu_add_date),
+            getResources().getString(R.string.sort_menu_board),
+            getResources().getString(R.string.sort_menu_title),
+            getResources().getString(R.string.sort_menu_date),
+            getResources().getString(R.string.sort_menu_bump_date)
+        };
+
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         builder.setTitle(R.string.menu_sort);
-        builder.setItems(options, new DialogInterface.OnClickListener() {
+        builder.setSingleChoiceItems(options, 0, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int which) {
                 
                 }
             });
+
+        builder.setPositiveButton(R.string.sort_menu_ascend, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+
+        builder.setNeutralButton(R.string.sort_menu_descend, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
 
         builder.show();
     }
