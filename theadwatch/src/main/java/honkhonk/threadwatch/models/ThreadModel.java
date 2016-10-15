@@ -25,7 +25,9 @@ public class ThreadModel {
 
     public boolean archived;
 
-    public int time;
+    public long time;
+
+    public long latestTime;
 
     public Calendar dateAdded;
 
@@ -45,6 +47,10 @@ public class ThreadModel {
         } else {
             return getSanitizedComment();
         }
+    }
+
+    public String getBoardName() {
+        return board.replace("/", "");
     }
 
     public String getSanitizedComment() {

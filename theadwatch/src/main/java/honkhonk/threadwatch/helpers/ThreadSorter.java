@@ -48,20 +48,54 @@ final public class ThreadSorter {
     }
 
     private static void sortByBoard(ArrayList<ThreadModel> list, final boolean ascending) {
-
+        Collections.sort(list, new Comparator<ThreadModel>() {
+            @Override
+            public int compare(final ThreadModel lhs, final ThreadModel rhs) {
+                if (ascending) {
+                    return lhs.getBoardName().compareTo(rhs.getBoardName());
+                } else {
+                    return rhs.getBoardName().compareTo(lhs.getBoardName());
+                }
+            }
+        });
     }
 
     private static void sortByTitle(ArrayList<ThreadModel> list, final boolean ascending) {
-
+        Collections.sort(list, new Comparator<ThreadModel>() {
+            @Override
+            public int compare(final ThreadModel lhs, final ThreadModel rhs) {
+                if (ascending) {
+                    return lhs.getTitle().compareTo(rhs.getTitle());
+                } else {
+                    return rhs.getTitle().compareTo(lhs.getTitle());
+                }
+            }
+        });
     }
 
     private static void sortByDate(ArrayList<ThreadModel> list, final boolean ascending) {
-
+        Collections.sort(list, new Comparator<ThreadModel>() {
+            @Override
+            public int compare(final ThreadModel lhs, final ThreadModel rhs) {
+                if (ascending) {
+                    return Long.compare(lhs.time, rhs.time);
+                } else {
+                    return Long.compare(rhs.time, lhs.time);
+                }
+            }
+        });
     }
 
     private static void sortByLatestUpdated(ArrayList<ThreadModel> list, final boolean ascending) {
-
+        Collections.sort(list, new Comparator<ThreadModel>() {
+            @Override
+            public int compare(final ThreadModel lhs, final ThreadModel rhs) {
+                if (ascending) {
+                    return Long.compare(lhs.latestTime, rhs.latestTime);
+                } else {
+                    return Long.compare(rhs.latestTime, lhs.latestTime);
+                }
+            }
+        });
     }
-
-
 }

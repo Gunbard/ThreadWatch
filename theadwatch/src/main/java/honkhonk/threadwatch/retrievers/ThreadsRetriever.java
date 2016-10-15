@@ -38,6 +38,7 @@ public class ThreadsRetriever implements PostsRetriever.PostsRetrieverListener {
                                final ArrayList<PostModel> posts) {
         // First post should always be OP
         final PostModel op = posts.get(0);
+        final PostModel latest = posts.get(posts.size() - 1);
         thread.name = op.name;
         thread.comment = op.comment;
         thread.subject = op.subject;
@@ -46,6 +47,7 @@ public class ThreadsRetriever implements PostsRetriever.PostsRetrieverListener {
         thread.imageCount = op.imageCount;
         thread.archived = (op.archived == 1);
         thread.closed = (op.closed == 1);
+        thread.latestTime = latest.time;
 
         retrievedThreads.add(thread);
         processThreadQueue(context);

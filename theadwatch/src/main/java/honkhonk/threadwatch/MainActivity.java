@@ -45,13 +45,13 @@ public class MainActivity extends AppCompatActivity
     final public static String TAG = MainActivity.class.getSimpleName();
 
     private int fadeDuration;
-
     private SwipeRefreshLayout swipeContainer;
-
     private ArrayList<ThreadModel> listDataSource = new ArrayList<>();
     private ArrayAdapter<ThreadModel> listAdapter;
-
     private ListView listView;
+
+    // TODO: Move to SharedPrefs
+    private int sortMode = 0;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -342,10 +342,21 @@ public class MainActivity extends AppCompatActivity
         builder.setTitle(R.string.thread_info_dialog_title);
 
         final ThreadModel thread = listDataSource.get(position);
+
+        Calendar createDate = Calendar.getInstance();
+        createDate.setTimeInMillis(thread.time);
+
+        Calendar latestDate = Calendar.getInstance();
+        latestDate.setTimeInMillis(thread.latestTime);
+
         final String threadData =
             thread.getUrl() + "\n\n" +
+            "Added on: " + thread.dateAdded.getTime() + "\n\n" +
             thread.getSanitizedComment() + "\n\n" +
-            "Replies: " + thread.replyCount;
+            "Posted on: " + createDate.getTime() + "\n\n" +
+            "Latest on: " + latestDate.getTime() + "\n\n" +
+            "Replies: " + thread.replyCount + "\n" +
+            "Images: " + thread.imageCount;
         builder.setMessage(threadData);
 
         final AlertDialog dialog = builder.create();
@@ -380,7 +391,7 @@ public class MainActivity extends AppCompatActivity
 
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         builder.setTitle(R.string.menu_sort);
-        builder.setSingleChoiceItems(options, 0, null);
+        builder.setSingleChoiceItems(options, sortMode, null);
         builder.setPositiveButton(R.string.sort_menu_ascend, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -388,6 +399,7 @@ public class MainActivity extends AppCompatActivity
                         ((AlertDialog)dialog).getListView().getCheckedItemPosition();
                 ThreadSorter.sort(listDataSource, Common.sortOptionsValues[selectedPosition], true);
                 listAdapter.notifyDataSetChanged();
+                sortMode = selectedPosition;
             }
         });
 
@@ -398,6 +410,7 @@ public class MainActivity extends AppCompatActivity
                         ((AlertDialog)dialog).getListView().getCheckedItemPosition();
                 ThreadSorter.sort(listDataSource, Common.sortOptionsValues[selectedPosition], false);
                 listAdapter.notifyDataSetChanged();
+                sortMode = selectedPosition;
             }
         });
 
