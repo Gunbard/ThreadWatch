@@ -9,11 +9,21 @@ public class ThreadModel {
 
     public String id;
 
+    public String name;
+
     public String subject;
 
     public String comment;
 
+    public int replyCount;
+
     public int imageCount;
+
+    public boolean closed;
+
+    public boolean archived;
+
+    public int time;
 
     public String getUrl() {
         //http(s)://boards.4chan.org/board/thread/num
@@ -23,6 +33,13 @@ public class ThreadModel {
         } else {
             return null;
         }
+    }
 
+    public String getSanitizedComment() {
+        if (comment != null && !comment.equals("")) {
+            return android.text.Html.fromHtml(comment).toString();
+        } else {
+            return "";
+        }
     }
 }

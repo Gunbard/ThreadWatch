@@ -36,7 +36,17 @@ public class ThreadsRetriever implements PostsRetriever.PostsRetrieverListener {
     public void postsRetrieved(final Context context,
                                final ThreadModel thread,
                                final ArrayList<PostModel> posts) {
-        thread.comment = posts.get(0).comment;
+        // First post should always be OP
+        final PostModel op = posts.get(0);
+        thread.name = op.name;
+        thread.comment = op.comment;
+        thread.subject = op.subject;
+        thread.time = op.time;
+        thread.replyCount = op.replyCount;
+        thread.imageCount = op.imageCount;
+        thread.archived = (op.archived == 1);
+        thread.closed = (op.closed == 1);
+
         retrievedThreads.add(thread);
         processThreadQueue(context);
     }

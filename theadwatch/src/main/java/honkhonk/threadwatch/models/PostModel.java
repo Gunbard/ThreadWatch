@@ -7,6 +7,9 @@ import com.google.gson.annotations.SerializedName;
  */
 
 public class PostModel {
+    @SerializedName("name")
+    public String name;
+
     @SerializedName("sub")
     public String subject;
 
@@ -19,4 +22,19 @@ public class PostModel {
     // 0 indicates thread OP
     @SerializedName("resto")
     public int repliesTo;
+
+    @SerializedName("replies")
+    public int replyCount;
+
+    @SerializedName("images")
+    public int imageCount;
+
+    @SerializedName("closed")
+    public int closed;
+
+    @SerializedName("archived")
+    public int archived;
+
+    @SerializedName("time")
+    public int time;
 }

@@ -80,18 +80,10 @@ public class MainActivity extends AppCompatActivity
                     boardName.setText("/" + thread.board + "/");
 
                     final TextView title = (TextView) view.findViewById(R.id.threadTitle);
-                    final String comment = thread.comment;
+                    title.setText(thread.getSanitizedComment());
 
-                    if (comment != null && !comment.equals("")) {
-                        final String sanitizedComment =
-                                android.text.Html.fromHtml(comment)
-                                        .toString();
-
-                        title.setText(sanitizedComment);
-                    }
-                    else
-                    {
-                        title.setText("");
+                    if (thread.archived) {
+                        view.setBackgroundColor(Color.LTGRAY);
                     }
                 }
                 return view;
@@ -149,6 +141,9 @@ public class MainActivity extends AppCompatActivity
     public boolean onOptionsItemSelected(final MenuItem item) {
         // Handle item selection
         switch (item.getItemId()) {
+            case R.id.menu_sort:
+                showSortMenu();
+                return true;
             case R.id.menu_refresh:
                 refresh();
                 return true;
@@ -204,6 +199,7 @@ public class MainActivity extends AppCompatActivity
                 (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         switch (item.getItemId()) {
             case R.id.thread_menu_info:
+                showThreadInfo(info.position);
                 return true;
             case R.id.thread_menu_delete:
                 deleteThread(info.position);
@@ -345,12 +341,28 @@ public class MainActivity extends AppCompatActivity
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
     }
 
+    private void showThreadInfo(final int position) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.thread_info_dialog_title);
+
+        final ThreadModel thread = listDataSource.get(position);
+        final String threadData =
+            thread.getUrl() + "\n\n" +
+            thread.getSanitizedComment() + "\n\n" +
+            "Replies: " + thread.replyCount;
+        builder.setMessage(threadData);
+
+        final AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
     private void deleteThread(final int position) {
         final ThreadModel removedThread = listDataSource.remove(position);
         listAdapter.notifyDataSetChanged();
 
         Snackbar.make(findViewById(android.R.id.content),
-            "Deleted " + removedThread.comment, Snackbar.LENGTH_LONG)
+            getResources().getString(R.string.thread_menu_deleted) +  ": " + removedThread.comment,
+                Snackbar.LENGTH_LONG)
             .setAction(R.string.thread_menu_undo, new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -359,5 +371,18 @@ public class MainActivity extends AppCompatActivity
                 }
             })
             .show();
+    }
+
+    private void showSortMenu() {
+        final String[] options = {"stuff", "things"};
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setTitle(R.string.menu_sort);
+        builder.setItems(options, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                
+                }
+            });
+
+        builder.show();
     }
 }
