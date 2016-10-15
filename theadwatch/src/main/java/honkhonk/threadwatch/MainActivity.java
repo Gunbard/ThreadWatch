@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
@@ -23,6 +24,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -369,20 +372,31 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void deleteThread(final int position) {
-        final ThreadModel removedThread = listDataSource.remove(position);
-        listAdapter.notifyDataSetChanged();
+        Animation anim = AnimationUtils.loadAnimation(MainActivity.this,
+                android.R.anim.slide_out_right);
+        anim.setDuration(fadeDuration);
+        listView.getChildAt(position).startAnimation(anim);
 
-        Snackbar.make(findViewById(android.R.id.content),
-            getResources().getString(R.string.thread_menu_deleted) +  " " + removedThread.comment,
-                Snackbar.LENGTH_LONG)
-            .setAction(R.string.thread_menu_undo, new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    listAdapter.insert(removedThread, position);
-                    listAdapter.notifyDataSetChanged();
-                }
-            })
-            .show();
+        new Handler().postDelayed(new Runnable() {
+            public void run() {
+                final ThreadModel removedThread = listDataSource.remove(position);
+                listAdapter.notifyDataSetChanged();
+
+                Snackbar.make(findViewById(android.R.id.content),
+                        getResources().getString(R.string.thread_menu_deleted) +  " " +
+                                removedThread.comment,
+                        Snackbar.LENGTH_LONG)
+                        .setAction(R.string.thread_menu_undo, new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                listAdapter.insert(removedThread, position);
+                                listAdapter.notifyDataSetChanged();
+                            }
+                        })
+                        .show();
+            }
+
+        }, anim.getDuration());
     }
 
     private void showSortMenu() {

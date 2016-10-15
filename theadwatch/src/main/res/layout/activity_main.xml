@@ -21,7 +21,8 @@
             android:layout_height="match_parent"
             android:id="@+id/mainList"
             android:elevation="1dp"
-            android:background="@android:color/white">
+            android:background="@android:color/white"
+            android:animateLayoutChanges="true">
         </ListView>
 
     </android.support.v4.widget.SwipeRefreshLayout>
