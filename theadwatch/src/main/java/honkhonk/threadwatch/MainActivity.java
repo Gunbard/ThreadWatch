@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -435,6 +436,26 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        builder.show();
+        final AlertDialog dialog = builder.create();
+
+        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialog) {
+                final Button descendingButton =
+                        ((AlertDialog)dialog).getButton(AlertDialog.BUTTON_POSITIVE);
+                final Button ascendingButton =
+                        ((AlertDialog)dialog).getButton(AlertDialog.BUTTON_NEUTRAL);
+
+                if (sortAscending) {
+                    ascendingButton.setPaintFlags(ascendingButton.getPaintFlags() |
+                            Paint.UNDERLINE_TEXT_FLAG);
+                } else {
+                    descendingButton.setPaintFlags(descendingButton.getPaintFlags() |
+                            Paint.UNDERLINE_TEXT_FLAG);
+                }
+            }
+        });
+
+        dialog.show();
     }
 }
