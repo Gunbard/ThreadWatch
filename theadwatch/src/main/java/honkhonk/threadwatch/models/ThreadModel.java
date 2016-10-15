@@ -1,5 +1,7 @@
 package honkhonk.threadwatch.models;
 
+import java.util.Calendar;
+
 /**
  * Created by Gunbard on 10/13/2016.
  */
@@ -25,6 +27,8 @@ public class ThreadModel {
 
     public int time;
 
+    public Calendar dateAdded;
+
     public String getUrl() {
         //http(s)://boards.4chan.org/board/thread/num
 
@@ -32,6 +36,14 @@ public class ThreadModel {
             return "https://boards.4chan.org/" + board + "/thread/" + id;
         } else {
             return null;
+        }
+    }
+
+    public String getTitle() {
+        if (subject != null && subject.length() > 0) {
+            return subject;
+        } else {
+            return getSanitizedComment();
         }
     }
 

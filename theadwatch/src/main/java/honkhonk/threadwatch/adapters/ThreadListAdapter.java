@@ -39,7 +39,7 @@ public class ThreadListAdapter extends ArrayAdapter<ThreadModel> {
             boardName.setText("/" + thread.board + "/");
 
             final TextView title = (TextView) view.findViewById(R.id.threadTitle);
-            title.setText(thread.getSanitizedComment());
+            title.setText(thread.getTitle());
 
             if (thread.archived) {
                 view.setBackgroundColor(Color.LTGRAY);

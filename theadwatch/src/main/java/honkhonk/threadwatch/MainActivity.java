@@ -32,8 +32,11 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 
 import honkhonk.threadwatch.adapters.ThreadListAdapter;
+import honkhonk.threadwatch.helpers.Common;
+import honkhonk.threadwatch.helpers.ThreadSorter;
 import honkhonk.threadwatch.models.ThreadModel;
 import honkhonk.threadwatch.retrievers.ThreadsRetriever;
 
@@ -61,9 +64,9 @@ public class MainActivity extends AppCompatActivity
         listView = (ListView) findViewById(R.id.mainList);
 
         final ArrayList<ThreadModel> threads = createTestThreads();
-
-        listDataSource.add(threads.get(0));
-        listDataSource.add(threads.get(1));
+        for (final ThreadModel thread : threads) {
+            listDataSource.add(thread);
+        }
 
         listAdapter = new ThreadListAdapter(this,
                 R.layout.thread_item, R.id.threadTitle, listDataSource);
@@ -239,15 +242,30 @@ public class MainActivity extends AppCompatActivity
     }
 
     private ArrayList<ThreadModel> createTestThreads() {
+        Calendar date = Calendar.getInstance();
+
         ThreadModel newThread1 = new ThreadModel();
         newThread1.board = "jp";
         newThread1.id = "15862023";
+        newThread1.dateAdded = date;
+
+        Calendar date2 = Calendar.getInstance();
+        date2.add(Calendar.DAY_OF_MONTH, -5);
 
         ThreadModel newThread2 = new ThreadModel();
         newThread2.board = "cgl";
         newThread2.id = "9178233";
+        newThread2.dateAdded = date2;
 
-        return new ArrayList<>(Arrays.asList(newThread1, newThread2));
+        Calendar date3 = Calendar.getInstance();
+        date3.add(Calendar.DAY_OF_MONTH, -2);
+
+        ThreadModel newThread3 = new ThreadModel();
+        newThread3.board = "cgl";
+        newThread3.id = "9201659";
+        newThread3.dateAdded = date3;
+
+        return new ArrayList<>(Arrays.asList(newThread1, newThread2, newThread3));
     }
 
     private void showAddThreadDialog() {
@@ -283,6 +301,7 @@ public class MainActivity extends AppCompatActivity
                 ThreadModel newThread = new ThreadModel();
                 newThread.board = pathParts[1];
                 newThread.id = pathParts[3];
+                newThread.dateAdded = Calendar.getInstance();
 
                 listDataSource.add(newThread);
 
@@ -361,23 +380,24 @@ public class MainActivity extends AppCompatActivity
 
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         builder.setTitle(R.string.menu_sort);
-        builder.setSingleChoiceItems(options, 0, new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int which) {
-                
-                }
-            });
-
+        builder.setSingleChoiceItems(options, 0, null);
         builder.setPositiveButton(R.string.sort_menu_ascend, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-
+                final int selectedPosition =
+                        ((AlertDialog)dialog).getListView().getCheckedItemPosition();
+                ThreadSorter.sort(listDataSource, Common.sortOptionsValues[selectedPosition], true);
+                listAdapter.notifyDataSetChanged();
             }
         });
 
         builder.setNeutralButton(R.string.sort_menu_descend, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-
+                final int selectedPosition =
+                        ((AlertDialog)dialog).getListView().getCheckedItemPosition();
+                ThreadSorter.sort(listDataSource, Common.sortOptionsValues[selectedPosition], false);
+                listAdapter.notifyDataSetChanged();
             }
         });
 

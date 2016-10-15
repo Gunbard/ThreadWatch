@@ -17,13 +17,13 @@
     <string name="thread_menu_deleted">Deleted:</string>
     <string name="thread_menu_undo">Undo</string>
 
-    <string name="sort_menu_title">Comment</string>
+    <string name="sort_menu_title">Title</string>
     <string name="sort_menu_board">Board</string>
     <string name="sort_menu_date">Creation Date</string>
     <string name="sort_menu_bump_date">Last Reply</string>
     <string name="sort_menu_add_date">Date Added</string>
     <string name="sort_menu_ascend">Ascending</string>
-    <string name="sort_menu_descend">Decending</string>
+    <string name="sort_menu_descend">Descending</string>
 
     <string name="title_activity_settings">Settings</string>
 
