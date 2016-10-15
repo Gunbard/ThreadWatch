@@ -6,10 +6,12 @@
     <string name="menu_help">Help</string>
     <string name="menu_about">About</string>
 
-    <string name="add_thread_dialog_title">Add Thread</string>>
-    <string name="add_thread_dialog_input_hint">Paste a thread url</string>>
+    <string name="add_thread_dialog_title">Add Thread</string>
+    <string name="add_thread_dialog_input_hint">Paste a thread url</string>
 
-    <string name="thread_menu_delete">Delete</string>>
+    <string name="thread_menu_info">Info</string>
+    <string name="thread_menu_delete">Delete</string>
+    <string name="thread_menu_undo">Undo</string>
 
     <string name="title_activity_settings">Settings</string>
 

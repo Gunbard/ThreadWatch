@@ -30,5 +30,6 @@ dependencies {
     compile 'com.android.support:support-vector-drawable:23.4.0'
     compile 'com.android.volley:volley:1.0.0'
     compile 'com.google.code.gson:gson:2.7'
+    compile 'com.android.support:design:23.4.0'
     testCompile 'junit:junit:4.12'
 }

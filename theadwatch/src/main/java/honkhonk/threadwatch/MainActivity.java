@@ -6,15 +6,19 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.NotificationCompat;
 import android.text.Editable;
+import android.text.SpannableString;
 import android.text.TextWatcher;
+import android.text.style.ForegroundColorSpan;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -170,6 +174,12 @@ public class MainActivity extends AppCompatActivity
         super.onCreateContextMenu(menu, v, menuInfo);
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.thread_action_menu, menu);
+
+        // Set delete button color
+        MenuItem deleteButton = menu.findItem(R.id.thread_menu_delete);
+        SpannableString s = new SpannableString(deleteButton.getTitle());
+        s.setSpan(new ForegroundColorSpan(Color.RED), 0, s.length(), 0);
+        deleteButton.setTitle(s);
     }
 
     // Setup a recurring alarm every half hour
@@ -193,6 +203,8 @@ public class MainActivity extends AppCompatActivity
         final AdapterView.AdapterContextMenuInfo info =
                 (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         switch (item.getItemId()) {
+            case R.id.thread_menu_info:
+                return true;
             case R.id.thread_menu_delete:
                 deleteThread(info.position);
                 return true;
@@ -308,7 +320,6 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-
         final AlertDialog dialog = builder.create();
 
         input.addTextChangedListener(new TextWatcher() {
@@ -330,12 +341,23 @@ public class MainActivity extends AppCompatActivity
         });
 
         dialog.show();
-        
+
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
     }
 
     private void deleteThread(final int position) {
-        listDataSource.remove(position);
+        final ThreadModel removedThread = listDataSource.remove(position);
         listAdapter.notifyDataSetChanged();
+
+        Snackbar.make(findViewById(android.R.id.content),
+            "Deleted " + removedThread.comment, Snackbar.LENGTH_LONG)
+            .setAction(R.string.thread_menu_undo, new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    listAdapter.insert(removedThread, position);
+                    listAdapter.notifyDataSetChanged();
+                }
+            })
+            .show();
     }
 }
