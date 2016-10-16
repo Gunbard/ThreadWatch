@@ -368,10 +368,10 @@ public class MainActivity extends AppCompatActivity
         final ThreadModel thread = listDataSource.get(position);
 
         Calendar createDate = Calendar.getInstance();
-        createDate.setTimeInMillis(thread.time);
+        createDate.setTimeInMillis(thread.time * 1000);
 
         Calendar latestDate = Calendar.getInstance();
-        latestDate.setTimeInMillis(thread.latestTime);
+        latestDate.setTimeInMillis(thread.latestTime * 1000);
 
         final String threadData =
             thread.getUrl() + "\n\n" +

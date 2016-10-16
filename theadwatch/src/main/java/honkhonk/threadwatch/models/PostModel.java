@@ -35,6 +35,6 @@ public class PostModel {
     @SerializedName("archived")
     public int archived;
 
-    @SerializedName("tim")
-    public long time;
+    @SerializedName("time")
+    public int time;
 }
