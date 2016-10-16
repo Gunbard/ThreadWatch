@@ -22,7 +22,8 @@
             android:id="@+id/mainList"
             android:elevation="1dp"
             android:background="@android:color/white"
-            android:animateLayoutChanges="true">
+            android:animateLayoutChanges="true"
+            android:drawSelectorOnTop="true">
         </ListView>
 
     </android.support.v4.widget.SwipeRefreshLayout>

@@ -11,6 +11,7 @@ import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
@@ -24,6 +25,7 @@ import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -152,6 +154,14 @@ public class MainActivity extends AppCompatActivity
     public void onCreateContextMenu(ContextMenu menu, View v,
                                     ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
+
+        // Cancel any in-progress swipe-to-refresh gesture to stop refresh while the menu is up
+        final long eventTime = SystemClock.uptimeMillis();
+        MotionEvent touchUpEvent =
+                MotionEvent.obtain(eventTime, eventTime, MotionEvent.ACTION_UP, 0.0f, 0.0f, 0);
+
+        swipeContainer.dispatchTouchEvent(touchUpEvent);
+
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.thread_action_menu, menu);
 
@@ -168,7 +178,8 @@ public class MainActivity extends AppCompatActivity
         Intent intent = new Intent(getApplicationContext(), AlarmReceiver.class);
 
         // Create a PendingIntent to be triggered when the alarm goes off
-        final PendingIntent pendingIntent = PendingIntent.getBroadcast(this, AlarmReceiver.REQUEST_CODE,
+        final PendingIntent pendingIntent =
+                PendingIntent.getBroadcast(this, AlarmReceiver.REQUEST_CODE,
                 intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         long firstMillis = System.currentTimeMillis(); // alarm is set right away
@@ -220,11 +231,13 @@ public class MainActivity extends AppCompatActivity
         updateList(threads);
         swipeContainer.setRefreshing(false);
         listView.animate().alpha(1.0f).setDuration(fadeDuration);
+        listView.setEnabled(true);
     }
 
     public void threadRetrievalFailed() {
         swipeContainer.setRefreshing(false);
         listView.animate().alpha(1.0f).setDuration(fadeDuration);
+        listView.setEnabled(true);
     }
 
     /**
@@ -239,9 +252,10 @@ public class MainActivity extends AppCompatActivity
 
     private void refresh() {
         swipeContainer.setRefreshing(true);
+        listView.setEnabled(false);
 
-        ThreadSorter.sort(listDataSource, Common.sortOptionsValues[sortMode], sortAscending);
-        listAdapter.notifyDataSetChanged();
+        //ThreadSorter.sort(listDataSource, Common.sortOptionsValues[sortMode], sortAscending);
+        //listAdapter.notifyDataSetChanged();
 
         listView.animate().alpha(0.5f).setDuration(fadeDuration);
 
@@ -313,6 +327,7 @@ public class MainActivity extends AppCompatActivity
                 newThread.dateAdded = Calendar.getInstance();
 
                 listDataSource.add(newThread);
+                listAdapter.notifyDataSetChanged();
 
                 Toast.makeText(MainActivity.this, "Added " + input.getText(),
                         Toast.LENGTH_SHORT).show();
