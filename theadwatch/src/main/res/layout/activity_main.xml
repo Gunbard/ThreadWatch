@@ -11,6 +11,16 @@
     tools:context="honkhonk.threadwatch.MainActivity"
     android:orientation="vertical">
 
+    <TextView
+        android:text="@string/no_threads_message"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/noThreadsText"
+        android:elevation="2dp"
+        android:gravity="center"
+        android:textSize="24sp"
+        android:padding="16dp" />
+
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/swipeContainer"
         android:layout_width="match_parent"

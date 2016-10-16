@@ -34,6 +34,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -55,6 +56,7 @@ public class MainActivity extends AppCompatActivity
     private ArrayList<ThreadModel> listDataSource = new ArrayList<>();
     private ArrayAdapter<ThreadModel> listAdapter;
     private ListView listView;
+    private TextView noThreadsText;
 
     // TODO: Move to SharedPrefs
     private int sortMode = 0;
@@ -69,6 +71,7 @@ public class MainActivity extends AppCompatActivity
         fadeDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
         listView = (ListView) findViewById(R.id.mainList);
+        noThreadsText = (TextView) findViewById(R.id.noThreadsText);
 
         final ArrayList<ThreadModel> threads = createTestThreads();
         for (final ThreadModel thread : threads) {
@@ -114,6 +117,7 @@ public class MainActivity extends AppCompatActivity
         // Configure the refreshing colors
         swipeContainer.setColorSchemeResources(android.R.color.holo_green_dark);
 
+        updateNoThreadsText();
         refresh();
     }
 
@@ -234,10 +238,14 @@ public class MainActivity extends AppCompatActivity
         listView.setEnabled(true);
     }
 
-    public void threadRetrievalFailed() {
+    public void threadRetrievalFailed(final ArrayList<ThreadModel> threads) {
+        updateList(threads);
         swipeContainer.setRefreshing(false);
         listView.animate().alpha(1.0f).setDuration(fadeDuration);
         listView.setEnabled(true);
+
+        Toast.makeText(MainActivity.this, getResources().getString(R.string.refresh_error),
+                Toast.LENGTH_SHORT).show();
     }
 
     /**
@@ -251,11 +259,8 @@ public class MainActivity extends AppCompatActivity
 
 
     private void refresh() {
-        swipeContainer.setRefreshing(true);
         listView.setEnabled(false);
-
-        //ThreadSorter.sort(listDataSource, Common.sortOptionsValues[sortMode], sortAscending);
-        //listAdapter.notifyDataSetChanged();
+        swipeContainer.setRefreshing(true);
 
         listView.animate().alpha(0.5f).setDuration(fadeDuration);
 
@@ -328,6 +333,7 @@ public class MainActivity extends AppCompatActivity
 
                 listDataSource.add(newThread);
                 listAdapter.notifyDataSetChanged();
+                updateNoThreadsText();
 
                 Toast.makeText(MainActivity.this, "Added " + input.getText(),
                         Toast.LENGTH_SHORT).show();
@@ -397,6 +403,7 @@ public class MainActivity extends AppCompatActivity
             public void run() {
                 final ThreadModel removedThread = listDataSource.remove(position);
                 listAdapter.notifyDataSetChanged();
+                updateNoThreadsText();
 
                 Snackbar.make(findViewById(android.R.id.content),
                         getResources().getString(R.string.thread_menu_deleted) +  " " +
@@ -472,5 +479,13 @@ public class MainActivity extends AppCompatActivity
         });
 
         dialog.show();
+    }
+
+    private void updateNoThreadsText() {
+        if (listDataSource.size() == 0) {
+            noThreadsText.setVisibility(View.VISIBLE);
+        } else {
+            noThreadsText.setVisibility(View.GONE);
+        }
     }
 }

@@ -29,7 +29,7 @@ public class PostsRetriever {
                             final ThreadModel thread,
                             final ArrayList<PostModel> posts);
 
-        void retrievalFailed();
+        void postsRetrievalFailed(final Context context, final ThreadModel thread);
     }
 
     public void addListener(final PostsRetrieverListener listener) {
@@ -51,7 +51,7 @@ public class PostsRetriever {
                             if (postsResponse.posts != null) {
                                 listener.postsRetrieved(context, thread, postsResponse.posts);
                             } else {
-                                listener.retrievalFailed();
+                                listener.postsRetrievalFailed(context, thread);
                             }
                         }
                     }
@@ -59,7 +59,7 @@ public class PostsRetriever {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         for (final PostsRetrieverListener listener : listeners) {
-                            listener.retrievalFailed();
+                            listener.postsRetrievalFailed(context, thread);
                         }
                     }
                 });

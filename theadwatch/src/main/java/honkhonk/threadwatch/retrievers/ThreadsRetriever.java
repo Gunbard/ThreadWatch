@@ -15,10 +15,11 @@ public class ThreadsRetriever implements PostsRetriever.PostsRetrieverListener {
     private ArrayList<ThreadRetrieverListener> listeners = new ArrayList<>();
     private ArrayList<ThreadModel> threadsToRetrieve = new ArrayList<>();
     private ArrayList<ThreadModel> retrievedThreads = new ArrayList<>();
+    private boolean failureOccurred = false;
 
     public interface ThreadRetrieverListener {
         void threadsRetrieved(final ArrayList<ThreadModel> threads);
-        void threadRetrievalFailed();
+        void threadRetrievalFailed(final ArrayList<ThreadModel> threads);
     }
 
     public void addListener(final ThreadRetrieverListener listener) {
@@ -26,7 +27,7 @@ public class ThreadsRetriever implements PostsRetriever.PostsRetrieverListener {
     }
 
     public void retrieveThreadData(final Context context, final ArrayList<ThreadModel> threads) {
-        threadsToRetrieve = threads;
+        threadsToRetrieve.addAll(threads);
         processThreadQueue(context);
     }
 
@@ -53,10 +54,10 @@ public class ThreadsRetriever implements PostsRetriever.PostsRetrieverListener {
         processThreadQueue(context);
     }
 
-    public void retrievalFailed() {
-        for (final ThreadRetrieverListener listener : listeners) {
-            listener.threadRetrievalFailed();
-        }
+    public void postsRetrievalFailed(final Context context, final ThreadModel thread) {
+        failureOccurred = true;
+        retrievedThreads.add(thread);
+        processThreadQueue(context);
     }
 
     private void processThreadQueue(final Context context) {
@@ -73,7 +74,11 @@ public class ThreadsRetriever implements PostsRetriever.PostsRetrieverListener {
 
     private void finishedRetrieving() {
         for (final ThreadRetrieverListener listener : listeners) {
-            listener.threadsRetrieved(retrievedThreads);
+            if (failureOccurred) {
+                listener.threadRetrievalFailed(retrievedThreads);
+            } else {
+                listener.threadsRetrieved(retrievedThreads);
+            }
         }
     }
 }
