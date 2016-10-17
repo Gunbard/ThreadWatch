@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -24,6 +25,7 @@ import android.text.Editable;
 import android.text.SpannableString;
 import android.text.TextWatcher;
 import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -40,6 +42,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -52,6 +57,10 @@ import honkhonk.threadwatch.retrievers.ThreadsRetriever;
 
 public class MainActivity extends AppCompatActivity
         implements ThreadsRetriever.ThreadRetrieverListener {
+    final public static String PREFS_NAME = "ThreadWatcherSharedPrefs";
+    final public static String SAVED_THREAD_DATA = "SavedThreadData";
+    final public static String SAVED_SORT_MODE = "SavedSortMode";
+    final public static String SAVED_SORT_ASCENDING = "SavedSortAscending";
     final public static String TAG = MainActivity.class.getSimpleName();
 
     private int fadeDuration;
@@ -61,7 +70,6 @@ public class MainActivity extends AppCompatActivity
     private ListView listView;
     private TextView noThreadsText;
 
-    // TODO: Move to SharedPrefs
     private int sortMode = 0;
     private boolean sortAscending = false;
 
@@ -76,9 +84,12 @@ public class MainActivity extends AppCompatActivity
         listView = (ListView) findViewById(R.id.mainList);
         noThreadsText = (TextView) findViewById(R.id.noThreadsText);
 
-        final ArrayList<ThreadModel> threads = createTestThreads();
-        for (final ThreadModel thread : threads) {
-            listDataSource.add(thread);
+        if (!restoreData()) {
+            Log.i(TAG, "No previously saved threads found");
+            /*final ArrayList<ThreadModel> threads = createTestThreads();
+            for (final ThreadModel thread : threads) {
+                listDataSource.add(thread);
+            }*/
         }
 
         listAdapter = new ThreadListAdapter(this,
@@ -127,6 +138,12 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+        saveData();
+    }
+
+        @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_main, menu);
@@ -275,7 +292,7 @@ public class MainActivity extends AppCompatActivity
 
         if (!isConnected) {
             Toast.makeText(MainActivity.this, getResources().getString(R.string.refresh_error),
-                    Toast.LENGTH_SHORT).show();
+                    Toast.LENGTH_LONG).show();
             swipeContainer.setRefreshing(false);
             return;
         }
@@ -534,5 +551,30 @@ public class MainActivity extends AppCompatActivity
         }
 
         return -1;
+    }
+
+    private void saveData() {
+        final String listDataAsJson = (new Gson()).toJson(listDataSource);
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString(SAVED_THREAD_DATA, listDataAsJson);
+        editor.putInt(SAVED_SORT_MODE, sortMode);
+        editor.putBoolean(SAVED_SORT_ASCENDING, sortAscending);
+        editor.apply();
+    }
+
+    private boolean restoreData() {
+        final SharedPreferences savedPrefs = getSharedPreferences(PREFS_NAME, 0);
+        final String listDataAsJson = savedPrefs.getString(SAVED_THREAD_DATA, null);
+        sortMode = savedPrefs.getInt(SAVED_SORT_MODE, 0);
+        sortAscending = savedPrefs.getBoolean(SAVED_SORT_ASCENDING, false);
+
+        if (listDataAsJson == null) {
+            return false;
+        }
+
+        listDataSource = (new Gson()).fromJson(listDataAsJson,
+                new TypeToken<ArrayList<ThreadModel>>() {}.getType());
+        return true;
     }
 }

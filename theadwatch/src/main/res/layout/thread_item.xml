@@ -37,7 +37,8 @@
         android:layout_toRightOf="@+id/boardTitle"
         android:layout_width="wrap_content"
         android:layout_toLeftOf="@+id/newPosts"
-        android:clickable="false" />
+        android:clickable="false"
+        android:hyphenationFrequency="none" />
 
     <TextView
         android:text="(408)"
