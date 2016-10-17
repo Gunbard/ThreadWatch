@@ -19,6 +19,8 @@ public class ThreadModel {
 
     public int replyCount;
 
+    public int replyCountDelta;
+
     public int imageCount;
 
     public boolean closed;

@@ -407,13 +407,14 @@ public class MainActivity extends AppCompatActivity
 
                 Snackbar.make(findViewById(android.R.id.content),
                         getResources().getString(R.string.thread_menu_deleted) +  " " +
-                                removedThread.comment,
+                                removedThread.getSanitizedComment(),
                         Snackbar.LENGTH_LONG)
                         .setAction(R.string.thread_menu_undo, new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
                                 listAdapter.insert(removedThread, position);
                                 listAdapter.notifyDataSetChanged();
+                                updateNoThreadsText();
                             }
                         })
                         .show();

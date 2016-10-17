@@ -4,8 +4,7 @@
 <RelativeLayout xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="64dp"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:contextClickable="true">
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <TextView
         android:layout_height="match_parent"
@@ -18,10 +17,10 @@
         android:layout_alignParentEnd="false"
         android:layout_alignParentLeft="true"
         android:text="/vr/"
-        android:layout_width="72dp" />
+        android:layout_width="72dp"
+        android:clickable="false" />
 
     <TextView
-        android:layout_width="match_parent"
         android:layout_alignParentTop="false"
         android:id="@+id/threadTitle"
         android:layout_alignParentEnd="false"
@@ -34,7 +33,22 @@
         android:maxLines="2"
         android:gravity="left|center_vertical"
         android:text="Some title"
-        android:layout_toRightOf="@+id/boardTitle" />
+        android:layout_toRightOf="@+id/boardTitle"
+        android:layout_width="wrap_content"
+        android:layout_toLeftOf="@+id/newPosts"
+        android:clickable="false" />
+
+    <TextView
+        android:text="(408)"
+        android:layout_height="match_parent"
+        android:id="@+id/newPosts"
+        android:layout_alignParentEnd="false"
+        android:gravity="center"
+        android:layout_alignParentTop="false"
+        android:layout_alignParentRight="true"
+        android:layout_width="wrap_content"
+        android:padding="16dp"
+        android:clickable="false" />
 
 </RelativeLayout>
 

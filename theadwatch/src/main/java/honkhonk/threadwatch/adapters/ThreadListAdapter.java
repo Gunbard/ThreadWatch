@@ -41,6 +41,13 @@ public class ThreadListAdapter extends ArrayAdapter<ThreadModel> {
             final TextView title = (TextView) view.findViewById(R.id.threadTitle);
             title.setText(thread.getTitle());
 
+            final TextView newPosts = (TextView) view.findViewById(R.id.newPosts);
+            if (thread.replyCountDelta != 0) {
+                newPosts.setText("(" + thread.replyCountDelta + ")") ;
+            } else {
+                newPosts.setText("") ;
+            }
+
             if (thread.archived) {
                 view.setBackgroundColor(Color.LTGRAY);
             } else {
