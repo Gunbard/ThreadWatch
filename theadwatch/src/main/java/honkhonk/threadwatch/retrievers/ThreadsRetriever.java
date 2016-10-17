@@ -56,6 +56,7 @@ public class ThreadsRetriever implements PostsRetriever.PostsRetrieverListener {
     }
 
     public void postsRetrievalFailed(final Context context, final ThreadModel thread) {
+        thread.notFound = true;
         failureOccurred = true;
         retrievedThreads.add(thread);
         processThreadQueue(context);

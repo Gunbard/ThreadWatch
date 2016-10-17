@@ -27,6 +27,8 @@ public class ThreadModel {
 
     public boolean archived;
 
+    public boolean notFound;
+
     public long time;
 
     public long latestTime;

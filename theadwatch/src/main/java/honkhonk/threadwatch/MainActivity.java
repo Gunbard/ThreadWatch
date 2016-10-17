@@ -6,8 +6,11 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -91,7 +94,7 @@ public class MainActivity extends AppCompatActivity
                 final ThreadModel thread = listDataSource.get(position);
                 final String url = thread.getUrl();
 
-                if (url != null) {
+                if (url != null && !url.equals("")) {
                     final Intent browserIntent =
                             new Intent(Intent.ACTION_VIEW, Uri.parse(url));
                     startActivity(browserIntent);
@@ -242,10 +245,7 @@ public class MainActivity extends AppCompatActivity
         updateList(threads);
         swipeContainer.setRefreshing(false);
         listView.animate().alpha(1.0f).setDuration(fadeDuration);
-        listView.setEnabled(true);
-
-        Toast.makeText(MainActivity.this, getResources().getString(R.string.refresh_error),
-                Toast.LENGTH_SHORT).show();
+        listView.setEnabled(true);;
     }
 
     /**
@@ -257,8 +257,22 @@ public class MainActivity extends AppCompatActivity
         listAdapter.notifyDataSetChanged();
     }
 
-
     private void refresh() {
+        ConnectivityManager cm =
+                (ConnectivityManager) MainActivity.this
+                        .getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+
+        if (!isConnected) {
+            Toast.makeText(MainActivity.this, getResources().getString(R.string.refresh_error),
+                    Toast.LENGTH_SHORT).show();
+            swipeContainer.setRefreshing(false);
+            return;
+        }
+
         listView.setEnabled(false);
         swipeContainer.setRefreshing(true);
 
@@ -311,24 +325,38 @@ public class MainActivity extends AppCompatActivity
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(final DialogInterface dialog, final int which) {
-                final String errorMessage = "Not a valid thread url";
+                final Resources resources = MainActivity.this.getResources();
                 final Uri url = Uri.parse(input.getText().toString());
                 if (url.getAuthority() == null || !url.getAuthority().equals("boards.4chan.org")) {
-                    Toast.makeText(MainActivity.this, errorMessage,
+                    Toast.makeText(MainActivity.this,
+                            resources.getString(R.string.invalid_thread_url),
                             Toast.LENGTH_SHORT).show();
                     return;
                 }
 
                 final String[] pathParts = url.getPath().split("/");
-                if (pathParts.length < 4 || pathParts[1] == null || pathParts[3] == null) {
-                    Toast.makeText(MainActivity.this, errorMessage,
+                final String board = pathParts[1];
+                final String id = pathParts[3];
+
+                if (pathParts.length < 4 || board == null || id == null) {
+                    Toast.makeText(MainActivity.this,
+                            resources.getString(R.string.invalid_thread_url),
                             Toast.LENGTH_SHORT).show();
                     return;
                 }
 
+                final int dupeThreadIndex = getThreadIndex(board, id);
+                if (dupeThreadIndex > 0) {
+                    Toast.makeText(MainActivity.this,
+                            resources.getString(R.string.duplicate_thread),
+                            Toast.LENGTH_SHORT).show();
+                    listView.smoothScrollToPosition(dupeThreadIndex);
+                    return;
+                }
+
                 ThreadModel newThread = new ThreadModel();
-                newThread.board = pathParts[1];
-                newThread.id = pathParts[3];
+                newThread.board = board;
+                newThread.id = id;
                 newThread.dateAdded = Calendar.getInstance();
 
                 listDataSource.add(newThread);
@@ -488,5 +516,16 @@ public class MainActivity extends AppCompatActivity
         } else {
             noThreadsText.setVisibility(View.GONE);
         }
+    }
+
+    private int getThreadIndex(final String board, final String id) {
+        for (int i = 0; i < listDataSource.size(); i++) {
+            final ThreadModel thread = listDataSource.get(i);
+            if (thread.board.equals(board) && thread.id.equals(id)) {
+                return i;
+            }
+        }
+
+        return -1;
     }
 }
