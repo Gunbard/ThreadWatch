@@ -44,7 +44,7 @@ public class ThreadsRetriever implements PostsRetriever.PostsRetrieverListener {
         thread.comment = op.comment;
         thread.subject = op.subject;
         thread.time = op.time;
-        thread.replyCountDelta = op.replyCount - thread.replyCount;
+        thread.replyCountDelta += op.replyCount - thread.replyCount;
         thread.replyCount = op.replyCount;
         thread.imageCount = op.imageCount;
         thread.archived = (op.archived == 1);

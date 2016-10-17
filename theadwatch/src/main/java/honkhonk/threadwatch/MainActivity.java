@@ -97,6 +97,8 @@ public class MainActivity extends AppCompatActivity
                 if (url != null && !url.equals("")) {
                     final Intent browserIntent =
                             new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                    thread.replyCountDelta = 0;
+                    listAdapter.notifyDataSetChanged();
                     startActivity(browserIntent);
                 }
             }
@@ -203,6 +205,11 @@ public class MainActivity extends AppCompatActivity
         switch (item.getItemId()) {
             case R.id.thread_menu_info:
                 showThreadInfo(info.position);
+                return true;
+            case R.id.thread_menu_mark_read:
+                final ThreadModel thread = listDataSource.get(info.position);
+                thread.replyCountDelta = 0;
+                listAdapter.notifyDataSetChanged();
                 return true;
             case R.id.thread_menu_delete:
                 deleteThread(info.position);
