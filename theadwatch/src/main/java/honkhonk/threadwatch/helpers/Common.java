@@ -14,4 +14,10 @@ final public class Common {
     }
 
     public static final SortOptions[] sortOptionsValues = SortOptions.values();
+
+    // Shared prefs keys
+    final public static String PREFS_NAME = "ThreadWatcherSharedPrefs";
+    final public static String SAVED_THREAD_DATA = "SavedThreadData";
+    final public static String SAVED_SORT_MODE = "SavedSortMode";
+    final public static String SAVED_SORT_ASCENDING = "SavedSortAscending";
 }

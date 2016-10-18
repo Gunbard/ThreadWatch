@@ -57,10 +57,6 @@ import honkhonk.threadwatch.retrievers.ThreadsRetriever;
 
 public class MainActivity extends AppCompatActivity
         implements ThreadsRetriever.ThreadRetrieverListener {
-    final public static String PREFS_NAME = "ThreadWatcherSharedPrefs";
-    final public static String SAVED_THREAD_DATA = "SavedThreadData";
-    final public static String SAVED_SORT_MODE = "SavedSortMode";
-    final public static String SAVED_SORT_ASCENDING = "SavedSortAscending";
     final public static String TAG = MainActivity.class.getSimpleName();
 
     private int fadeDuration;
@@ -278,6 +274,9 @@ public class MainActivity extends AppCompatActivity
     private void updateList(final ArrayList<ThreadModel> threads) {
         listDataSource.clear();
         listDataSource.addAll(threads);
+
+        // Sort threads
+        ThreadSorter.sort(listDataSource, Common.sortOptionsValues[sortMode], sortAscending);
         listAdapter.notifyDataSetChanged();
     }
 
@@ -555,19 +554,19 @@ public class MainActivity extends AppCompatActivity
 
     private void saveData() {
         final String listDataAsJson = (new Gson()).toJson(listDataSource);
-        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        SharedPreferences settings = getSharedPreferences(Common.PREFS_NAME, 0);
         SharedPreferences.Editor editor = settings.edit();
-        editor.putString(SAVED_THREAD_DATA, listDataAsJson);
-        editor.putInt(SAVED_SORT_MODE, sortMode);
-        editor.putBoolean(SAVED_SORT_ASCENDING, sortAscending);
+        editor.putString(Common.SAVED_THREAD_DATA, listDataAsJson);
+        editor.putInt(Common.SAVED_SORT_MODE, sortMode);
+        editor.putBoolean(Common.SAVED_SORT_ASCENDING, sortAscending);
         editor.apply();
     }
 
     private boolean restoreData() {
-        final SharedPreferences savedPrefs = getSharedPreferences(PREFS_NAME, 0);
-        final String listDataAsJson = savedPrefs.getString(SAVED_THREAD_DATA, null);
-        sortMode = savedPrefs.getInt(SAVED_SORT_MODE, 0);
-        sortAscending = savedPrefs.getBoolean(SAVED_SORT_ASCENDING, false);
+        final SharedPreferences savedPrefs = getSharedPreferences(Common.PREFS_NAME, 0);
+        final String listDataAsJson = savedPrefs.getString(Common.SAVED_THREAD_DATA, null);
+        sortMode = savedPrefs.getInt(Common.SAVED_SORT_MODE, 0);
+        sortAscending = savedPrefs.getBoolean(Common.SAVED_SORT_ASCENDING, false);
 
         if (listDataAsJson == null) {
             return false;
