@@ -552,6 +552,10 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void addThread(final String threadUrl) {
+        if (threadUrl == null || threadUrl.length() == 0) {
+            return;
+        }
+
         final Resources resources = MainActivity.this.getResources();
         final Uri url = Uri.parse(threadUrl);
         if (url.getAuthority() == null || !url.getAuthority().equals("boards.4chan.org")) {
@@ -601,7 +605,15 @@ public class MainActivity extends AppCompatActivity
          // sent a thread url from the browser
          final String type = intent.getType();
          if (type != null && type.equals("text/plain")) {
-             final String threadUrl = (String) intent.getClipData().getItemAt(0).getText();
+             // Mobile Firefox
+             String threadUrl = (String)intent.getClipData().getItemAt(0).getText();
+             if (threadUrl == null) {
+                 // Mobile Chrome
+                 threadUrl = intent.getExtras().getString("android.intent.extra.TEXT", "");
+             } else {
+                 threadUrl = "";
+             }
+
              addThread(threadUrl);
          }
      }
