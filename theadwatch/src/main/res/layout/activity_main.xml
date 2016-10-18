@@ -24,7 +24,8 @@
             android:elevation="1dp"
             android:background="@android:color/white"
             android:animateLayoutChanges="true"
-            android:drawSelectorOnTop="true">
+            android:drawSelectorOnTop="true"
+            android:choiceMode="singleChoice">
         </ListView>
 
     </android.support.v4.widget.SwipeRefreshLayout>

@@ -143,17 +143,18 @@ public class MainActivity extends AppCompatActivity
     protected void onStart() {
         super.onStart();
 
-        // Activity may have been started externally e.g. user
-        // sent a thread url from the browser
         final Intent intent = getIntent();
-        final String type = intent.getType();
-        if (type != null && type.equals("text/plain")) {
-            final String threadUrl = (String) intent.getClipData().getItemAt(0).getText();
-            addThread(threadUrl);
-        }
+        handleIntent(intent);
     }
 
-        @Override
+    @Override
+    protected void onNewIntent(Intent intent)
+    {
+        super.onNewIntent(intent);
+        handleIntent(intent);
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_main, menu);
@@ -279,7 +280,7 @@ public class MainActivity extends AppCompatActivity
         updateList(threads);
         swipeContainer.setRefreshing(false);
         listView.animate().alpha(1.0f).setDuration(fadeDuration);
-        listView.setEnabled(true);;
+        listView.setEnabled(true);
     }
 
     /**
@@ -576,7 +577,7 @@ public class MainActivity extends AppCompatActivity
             Toast.makeText(MainActivity.this,
                     resources.getString(R.string.duplicate_thread),
                     Toast.LENGTH_SHORT).show();
-            listView.smoothScrollToPosition(dupeThreadIndex);
+            highlightListItem(dupeThreadIndex, fadeDuration * 4);
             return;
         }
 
@@ -593,5 +594,36 @@ public class MainActivity extends AppCompatActivity
                 Toast.LENGTH_SHORT).show();
 
         refresh();
+    }
+
+     void handleIntent(final Intent intent) {
+         // Activity may have been started externally e.g. user
+         // sent a thread url from the browser
+         final String type = intent.getType();
+         if (type != null && type.equals("text/plain")) {
+             final String threadUrl = (String) intent.getClipData().getItemAt(0).getText();
+             addThread(threadUrl);
+         }
+     }
+
+    private View getViewByPosition(int pos, ListView listView) {
+        final int firstListItemPosition = listView.getFirstVisiblePosition();
+        final int lastListItemPosition = firstListItemPosition + listView.getChildCount() - 1;
+
+        if (pos < firstListItemPosition || pos > lastListItemPosition ) {
+            return listView.getAdapter().getView(pos, null, listView);
+        } else {
+            final int childIndex = pos - firstListItemPosition;
+            return listView.getChildAt(childIndex);
+        }
+    }
+
+    private void highlightListItem(final int index, final int duration) {
+        listView.smoothScrollToPosition(index);
+        listView.setSelection(index);
+        View itemView = getViewByPosition(index, listView);
+        View background = itemView.findViewById(R.id.itemBackground);
+        background.setAlpha(1.0f);
+        background.animate().alpha(0.0f).setDuration(duration);
     }
 }

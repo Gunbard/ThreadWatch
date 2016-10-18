@@ -13,7 +13,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".MainActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize">
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -21,9 +22,7 @@
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data
-                    android:host="boards.4chan.org"
-                    android:mimeType="text/plain" />
+                <data android:mimeType="text/plain" />
             </intent-filter>
         </activity>
 
