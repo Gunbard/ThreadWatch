@@ -139,6 +139,20 @@ public class MainActivity extends AppCompatActivity
         saveData();
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        // Activity may have been started externally e.g. user
+        // sent a thread url from the browser
+        final Intent intent = getIntent();
+        final String type = intent.getType();
+        if (type != null && type.equals("text/plain")) {
+            final String threadUrl = (String) intent.getClipData().getItemAt(0).getText();
+            addThread(threadUrl);
+        }
+    }
+
         @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -348,48 +362,7 @@ public class MainActivity extends AppCompatActivity
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(final DialogInterface dialog, final int which) {
-                final Resources resources = MainActivity.this.getResources();
-                final Uri url = Uri.parse(input.getText().toString());
-                if (url.getAuthority() == null || !url.getAuthority().equals("boards.4chan.org")) {
-                    Toast.makeText(MainActivity.this,
-                            resources.getString(R.string.invalid_thread_url),
-                            Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                final String[] pathParts = url.getPath().split("/");
-                final String board = pathParts[1];
-                final String id = pathParts[3];
-
-                if (pathParts.length < 4 || board == null || id == null) {
-                    Toast.makeText(MainActivity.this,
-                            resources.getString(R.string.invalid_thread_url),
-                            Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                final int dupeThreadIndex = getThreadIndex(board, id);
-                if (dupeThreadIndex > 0) {
-                    Toast.makeText(MainActivity.this,
-                            resources.getString(R.string.duplicate_thread),
-                            Toast.LENGTH_SHORT).show();
-                    listView.smoothScrollToPosition(dupeThreadIndex);
-                    return;
-                }
-
-                ThreadModel newThread = new ThreadModel();
-                newThread.board = board;
-                newThread.id = id;
-                newThread.dateAdded = Calendar.getInstance();
-
-                listDataSource.add(newThread);
-                listAdapter.notifyDataSetChanged();
-                updateNoThreadsText();
-
-                Toast.makeText(MainActivity.this, "Added " + input.getText(),
-                        Toast.LENGTH_SHORT).show();
-
-                refresh();
+                addThread(input.getText().toString());
             }
         });
 
@@ -575,5 +548,50 @@ public class MainActivity extends AppCompatActivity
         listDataSource = (new Gson()).fromJson(listDataAsJson,
                 new TypeToken<ArrayList<ThreadModel>>() {}.getType());
         return true;
+    }
+
+    private void addThread(final String threadUrl) {
+        final Resources resources = MainActivity.this.getResources();
+        final Uri url = Uri.parse(threadUrl);
+        if (url.getAuthority() == null || !url.getAuthority().equals("boards.4chan.org")) {
+            Toast.makeText(MainActivity.this,
+                    resources.getString(R.string.invalid_thread_url),
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        final String[] pathParts = url.getPath().split("/");
+        final String board = pathParts[1];
+        final String id = pathParts[3];
+
+        if (pathParts.length < 4 || board == null || id == null) {
+            Toast.makeText(MainActivity.this,
+                    resources.getString(R.string.invalid_thread_url),
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        final int dupeThreadIndex = getThreadIndex(board, id);
+        if (dupeThreadIndex >= 0) {
+            Toast.makeText(MainActivity.this,
+                    resources.getString(R.string.duplicate_thread),
+                    Toast.LENGTH_SHORT).show();
+            listView.smoothScrollToPosition(dupeThreadIndex);
+            return;
+        }
+
+        ThreadModel newThread = new ThreadModel();
+        newThread.board = board;
+        newThread.id = id;
+        newThread.dateAdded = Calendar.getInstance();
+
+        listDataSource.add(newThread);
+        listAdapter.notifyDataSetChanged();
+        updateNoThreadsText();
+
+        Toast.makeText(MainActivity.this, "Added " + url,
+                Toast.LENGTH_SHORT).show();
+
+        refresh();
     }
 }
