@@ -609,9 +609,8 @@ public class MainActivity extends AppCompatActivity
              String threadUrl = (String)intent.getClipData().getItemAt(0).getText();
              if (threadUrl == null) {
                  // Mobile Chrome
-                 threadUrl = intent.getExtras().getString("android.intent.extra.TEXT", "");
-             } else {
-                 threadUrl = "";
+                 threadUrl = intent.getExtras().getString(Common.SHARE_TEXT_KEY, "");
+                 intent.getExtras().remove(Common.SHARE_TEXT_KEY);
              }
 
              addThread(threadUrl);
