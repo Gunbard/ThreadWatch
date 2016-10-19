@@ -145,6 +145,7 @@ public class MainActivity extends AppCompatActivity
 
         final Intent intent = getIntent();
         handleIntent(intent);
+        intent.setData(null);
     }
 
     @Override
@@ -152,6 +153,7 @@ public class MainActivity extends AppCompatActivity
     {
         super.onNewIntent(intent);
         handleIntent(intent);
+        intent.setData(null);
     }
 
     @Override
@@ -610,7 +612,6 @@ public class MainActivity extends AppCompatActivity
              if (threadUrl == null) {
                  // Mobile Chrome
                  threadUrl = intent.getExtras().getString(Common.SHARE_TEXT_KEY, "");
-                 intent.getExtras().remove(Common.SHARE_TEXT_KEY);
              }
 
              addThread(threadUrl);
