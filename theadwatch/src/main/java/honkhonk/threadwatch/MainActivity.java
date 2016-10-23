@@ -434,7 +434,7 @@ public class MainActivity extends AppCompatActivity
 
                 Snackbar.make(findViewById(android.R.id.content),
                         getResources().getString(R.string.thread_menu_deleted) +  " " +
-                                removedThread.getSanitizedComment(),
+                                removedThread.getTitle(),
                         Snackbar.LENGTH_LONG)
                         .setAction(R.string.thread_menu_undo, new View.OnClickListener() {
                             @Override
@@ -591,6 +591,7 @@ public class MainActivity extends AppCompatActivity
         newThread.board = board;
         newThread.id = id;
         newThread.dateAdded = Calendar.getInstance();
+        newThread.firstRefresh = true;
 
         listDataSource.add(newThread);
         listAdapter.notifyDataSetChanged();

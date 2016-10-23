@@ -31,6 +31,8 @@ public class ThreadModel {
 
     public boolean disabled;
 
+    public boolean firstRefresh;
+
     public long time;
 
     public long latestTime;
@@ -49,7 +51,7 @@ public class ThreadModel {
 
     public String getTitle() {
         if (subject != null && subject.length() > 0) {
-            return subject;
+            return android.text.Html.fromHtml(subject).toString();
         } else {
             return getSanitizedComment();
         }
@@ -66,4 +68,5 @@ public class ThreadModel {
             return "";
         }
     }
+
 }

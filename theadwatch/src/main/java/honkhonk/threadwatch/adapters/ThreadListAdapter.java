@@ -48,7 +48,7 @@ public class ThreadListAdapter extends ArrayAdapter<ThreadModel> {
             if (thread.replyCountDelta != 0) {
                 newPosts.setText("(" + thread.replyCountDelta + ")") ;
             } else {
-                newPosts.setText("") ;
+                newPosts.setText("");
             }
 
             if (thread.archived) {
