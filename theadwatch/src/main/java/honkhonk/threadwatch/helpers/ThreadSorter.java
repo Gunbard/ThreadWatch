@@ -7,10 +7,17 @@ import java.util.Comparator;
 import honkhonk.threadwatch.models.ThreadModel;
 
 /**
+ * Helper class used to sort threads
  * Created by Gunbard on 10/15/2016.
  */
 
 final public class ThreadSorter {
+    /**
+     * Sorts a list of threads based on the sort option
+     * @param list The list of threads to sort
+     * @param sortOption Thread data field to sort by
+     * @param ascending Sort by ascending if true, descending otherwise
+     */
     public static void sort(ArrayList<ThreadModel> list, final Common.SortOptions sortOption,
                      final boolean ascending) {
         switch (sortOption) {
@@ -34,6 +41,11 @@ final public class ThreadSorter {
         }
     }
 
+    /**
+     * Sorts the list by the date the thread was added in the app
+     * @param list The list of threads to sort
+     * @param ascending Sort by ascending if true, descending otherwise
+     */
     private static void sortByAddDate(ArrayList<ThreadModel> list, final boolean ascending) {
         Collections.sort(list, new Comparator<ThreadModel>() {
             @Override
@@ -47,6 +59,11 @@ final public class ThreadSorter {
         });
     }
 
+    /**
+     * Sort by board name
+     * @param list The list of threads to sort
+     * @param ascending Sort by ascending if true, descending otherwise
+     */
     private static void sortByBoard(ArrayList<ThreadModel> list, final boolean ascending) {
         Collections.sort(list, new Comparator<ThreadModel>() {
             @Override
@@ -60,6 +77,11 @@ final public class ThreadSorter {
         });
     }
 
+    /**
+     * Sort by the thread title. Title is the subject if it exists, comment otherwise
+     * @param list The list of threads to sort
+     * @param ascending Sort by ascending if true, descending otherwise
+     */
     private static void sortByTitle(ArrayList<ThreadModel> list, final boolean ascending) {
         Collections.sort(list, new Comparator<ThreadModel>() {
             @Override
@@ -73,6 +95,11 @@ final public class ThreadSorter {
         });
     }
 
+    /**
+     * Sort by the thread's creation date
+     * @param list The list of threads to sort
+     * @param ascending Sort by ascending if true, descending otherwise
+     */
     private static void sortByDate(ArrayList<ThreadModel> list, final boolean ascending) {
         Collections.sort(list, new Comparator<ThreadModel>() {
             @Override
@@ -86,6 +113,11 @@ final public class ThreadSorter {
         });
     }
 
+    /**
+     * Sort by the date of the latest post
+     * @param list The list of threads to sort
+     * @param ascending Sort by ascending if true, descending otherwise
+     */
     private static void sortByLatestUpdated(ArrayList<ThreadModel> list, final boolean ascending) {
         Collections.sort(list, new Comparator<ThreadModel>() {
             @Override

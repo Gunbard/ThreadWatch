@@ -1,10 +1,12 @@
 package honkhonk.threadwatch.helpers;
 
 /**
+ * Global common constants
  * Created by Gunbard on 10/15/2016.
  */
 
 final public class Common {
+    // Available sorting options
     public enum SortOptions {
         ADD_DATE,
         BOARD,
@@ -13,7 +15,8 @@ final public class Common {
         BUMP_DATE
     }
 
-    public static final SortOptions[] sortOptionsValues = SortOptions.values();
+    // Helper to index SortOptions. This is not built into Java for some reason.
+    final public static SortOptions[] sortOptionsValues = SortOptions.values();
 
     // Shared prefs keys
     final public static String PREFS_NAME = "ThreadWatcherSharedPrefs";

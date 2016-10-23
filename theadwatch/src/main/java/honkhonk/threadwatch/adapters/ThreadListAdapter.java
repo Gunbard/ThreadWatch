@@ -42,7 +42,13 @@ public class ThreadListAdapter extends ArrayAdapter<ThreadModel> {
             boardName.setText("/" + thread.board + "/");
 
             final TextView title = (TextView) view.findViewById(R.id.threadTitle);
-            title.setText(thread.getTitle());
+            final String titleText = thread.getTitle();
+
+            if (titleText != null && titleText.length() > 0) {
+                title.setText(thread.getTitle());
+            } else {
+                title.setText(context.getResources().getString(R.string.no_thread_data));
+            }
 
             final TextView newPosts = (TextView) view.findViewById(R.id.newPosts);
             if (thread.replyCountDelta != 0) {
@@ -57,11 +63,11 @@ public class ThreadListAdapter extends ArrayAdapter<ThreadModel> {
                 view.setBackgroundColor(ContextCompat.getColor(context, R.color.colorClosedThread));
             } else if (thread.notFound) {
                 view.setBackgroundColor(ContextCompat.getColor(context, R.color.colorNotFoundThread));
-                title.setText(context.getResources().getString(R.string.no_thread_data));
             } else {
                 view.setBackgroundColor(ContextCompat.getColor(context, R.color.colorThreadBackground));
             }
         }
+
         return view;
     }
 }
