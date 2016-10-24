@@ -106,7 +106,7 @@ public class ThreadModel {
      * @return The subject of the thread, the sanitized comment otherwise (which can be blank)
      */
     public String getTitle() {
-        if (subject != null && subject.length() > 0) {
+        if (subject != null && !subject.equals("")) {
             return android.text.Html.fromHtml(subject).toString();
         } else {
             return getSanitizedComment();

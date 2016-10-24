@@ -44,7 +44,7 @@ public class ThreadListAdapter extends ArrayAdapter<ThreadModel> {
             final TextView title = (TextView) view.findViewById(R.id.threadTitle);
             final String titleText = thread.getTitle();
 
-            if (titleText != null && titleText.length() > 0) {
+            if (titleText != null && !titleText.equals("")) {
                 title.setText(thread.getTitle());
             } else {
                 title.setText(context.getResources().getString(R.string.no_thread_data));

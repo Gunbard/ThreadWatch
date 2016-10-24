@@ -294,6 +294,7 @@ public class MainActivity extends AppCompatActivity
 
         // Sort threads
         ThreadSorter.sort(listDataSource, Common.sortOptionsValues[sortMode], sortAscending);
+
         listAdapter.notifyDataSetChanged();
     }
 
