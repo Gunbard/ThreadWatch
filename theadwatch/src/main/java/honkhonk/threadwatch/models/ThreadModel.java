@@ -90,6 +90,11 @@ public class ThreadModel {
     public Calendar dateAdded;
 
     /**
+     * The last post's id
+     */
+    public long lastPostId;
+
+    /**
      * @return The url of the thread, null if the board or id are blank
      */
     public String getUrl() {

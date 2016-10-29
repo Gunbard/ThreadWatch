@@ -34,10 +34,13 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -56,7 +59,8 @@ import honkhonk.threadwatch.models.ThreadModel;
 import honkhonk.threadwatch.retrievers.ThreadsRetriever;
 
 public class MainActivity extends AppCompatActivity
-        implements ThreadsRetriever.ThreadRetrieverListener {
+        implements ThreadsRetriever.ThreadRetrieverListener,
+        ThreadListAdapter.ThreadListAdapterListener {
     final public static String TAG = MainActivity.class.getSimpleName();
 
     private int fadeDuration;
@@ -64,6 +68,8 @@ public class MainActivity extends AppCompatActivity
     private ArrayList<ThreadModel> listDataSource = new ArrayList<>();
     private ArrayAdapter<ThreadModel> listAdapter;
     private ListView listView;
+    private WebView previewWebView;
+    private ImageView fadeView;
     private TextView noThreadsText;
 
     private int sortMode = 0;
@@ -78,7 +84,17 @@ public class MainActivity extends AppCompatActivity
         fadeDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
         listView = (ListView) findViewById(R.id.mainList);
+        fadeView = (ImageView) findViewById(R.id.fadeView);
+        previewWebView = (WebView) findViewById(R.id.previewWebView);
         noThreadsText = (TextView) findViewById(R.id.noThreadsText);
+
+        previewWebView.setWebViewClient(new WebViewClient() {
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                //view.scrollTo(0, view.getContentHeight());
+                //view.pageDown(true);
+            }
+        });
 
         if (!restoreData()) {
             Log.i(TAG, "No previously saved threads found");
@@ -283,6 +299,43 @@ public class MainActivity extends AppCompatActivity
         swipeContainer.setRefreshing(false);
         listView.animate().alpha(1.0f).setDuration(fadeDuration);
         listView.setEnabled(true);
+    }
+
+    /**
+     * ThreadListAdapterListener
+     */
+    public void onListItemLongPress(final int position) {
+        fadeView.setAlpha(0.0f);
+        fadeView.animate().alpha(0.5f).setDuration(fadeDuration);
+
+        previewWebView.setVisibility(WebView.VISIBLE);
+        fadeView.setVisibility(View.VISIBLE);
+
+        Animation anim = AnimationUtils.loadAnimation(MainActivity.this,
+                android.R.anim.slide_in_left);
+        anim.setDuration(fadeDuration);
+        previewWebView.startAnimation(anim);
+
+        final ThreadModel thread = listDataSource.get(position);
+        final long lastPostId = thread.lastPostId;
+        previewWebView.loadUrl(thread.getUrl() + "#p" + Long.toString(lastPostId));
+    }
+
+    public void fadeViewClicked(final View view) {
+        view.animate().alpha(0.0f).setDuration(fadeDuration);
+
+        Animation anim = AnimationUtils.loadAnimation(MainActivity.this,
+                android.R.anim.slide_out_right);
+        anim.setDuration(fadeDuration);
+        previewWebView.startAnimation(anim);
+
+        new Handler().postDelayed(new Runnable() {
+            public void run() {
+                previewWebView.loadUrl("about:blank");
+                previewWebView.setVisibility(WebView.GONE);
+                view.setVisibility(View.GONE);
+            }
+        }, anim.getDuration());
     }
 
     /**
@@ -569,10 +622,18 @@ public class MainActivity extends AppCompatActivity
         }
 
         final String[] pathParts = url.getPath().split("/");
+
+        if (pathParts.length < 4) {
+            Toast.makeText(MainActivity.this,
+                    resources.getString(R.string.invalid_thread_url),
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         final String board = pathParts[1];
         final String id = pathParts[3];
 
-        if (pathParts.length < 4 || board == null || id == null) {
+        if (board == null || id == null || board.equals("") || id.equals("")) {
             Toast.makeText(MainActivity.this,
                     resources.getString(R.string.invalid_thread_url),
                     Toast.LENGTH_SHORT).show();
@@ -604,7 +665,7 @@ public class MainActivity extends AppCompatActivity
         refresh();
     }
 
-     void handleIntent(final Intent intent) {
+     private void handleIntent(final Intent intent) {
          // Activity may have been started externally e.g. user
          // sent a thread url from the browser
          final String type = intent.getType();

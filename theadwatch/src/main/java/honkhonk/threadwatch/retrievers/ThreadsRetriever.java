@@ -96,6 +96,7 @@ public class ThreadsRetriever implements PostsRetriever.PostsRetrieverListener {
         thread.notFound = false;
         thread.firstRefresh = false;
         thread.latestTime = latest.time;
+        thread.lastPostId = latest.number;
 
         retrievedThreads.add(thread);
         processThreadQueue(context);
