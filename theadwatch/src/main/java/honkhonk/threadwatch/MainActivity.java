@@ -42,6 +42,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -49,7 +50,6 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 
 import honkhonk.threadwatch.adapters.ThreadListAdapter;
@@ -93,15 +93,13 @@ public class MainActivity extends AppCompatActivity
             public void onPageFinished(WebView view, String url) {
                 //view.scrollTo(0, view.getContentHeight());
                 //view.pageDown(true);
+                ProgressBar spinner = (ProgressBar) view.findViewById(R.id.previewSpinner);
+                spinner.setVisibility(ProgressBar.GONE);
             }
         });
 
         if (!restoreData()) {
             Log.i(TAG, "No previously saved threads found");
-            /*final ArrayList<ThreadModel> threads = createTestThreads();
-            for (final ThreadModel thread : threads) {
-                listDataSource.add(thread);
-            }*/
         }
 
         listAdapter = new ThreadListAdapter(this,
@@ -115,15 +113,13 @@ public class MainActivity extends AppCompatActivity
                                     final int position,
                                     long id) {
                 final ThreadModel thread = listDataSource.get(position);
-                final String url = thread.getUrl();
+                final String url = thread.getUrl() + "#p" + Long.toString(thread.lastPostId);
 
-                if (url != null && !url.equals("")) {
-                    final Intent browserIntent =
-                            new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                    thread.replyCountDelta = 0;
-                    listAdapter.notifyDataSetChanged();
-                    startActivity(browserIntent);
-                }
+                final Intent browserIntent =
+                        new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                thread.replyCountDelta = 0;
+                listAdapter.notifyDataSetChanged();
+                startActivity(browserIntent);
             }
         };
 
@@ -319,6 +315,9 @@ public class MainActivity extends AppCompatActivity
         final ThreadModel thread = listDataSource.get(position);
         final long lastPostId = thread.lastPostId;
         previewWebView.loadUrl(thread.getUrl() + "#p" + Long.toString(lastPostId));
+
+        ProgressBar spinner = (ProgressBar) previewWebView.findViewById(R.id.previewSpinner);
+        spinner.setVisibility(ProgressBar.VISIBLE);
     }
 
     public void fadeViewClicked(final View view) {
@@ -375,33 +374,6 @@ public class MainActivity extends AppCompatActivity
         ThreadsRetriever threadsRetriever = new ThreadsRetriever();
         threadsRetriever.addListener(this);
         threadsRetriever.retrieveThreadData(this, listDataSource);
-    }
-
-    private ArrayList<ThreadModel> createTestThreads() {
-        Calendar date = Calendar.getInstance();
-
-        ThreadModel newThread1 = new ThreadModel();
-        newThread1.board = "jp";
-        newThread1.id = "15862023";
-        newThread1.dateAdded = date;
-
-        Calendar date2 = Calendar.getInstance();
-        date2.add(Calendar.DAY_OF_MONTH, -5);
-
-        ThreadModel newThread2 = new ThreadModel();
-        newThread2.board = "cgl";
-        newThread2.id = "9178233";
-        newThread2.dateAdded = date2;
-
-        Calendar date3 = Calendar.getInstance();
-        date3.add(Calendar.DAY_OF_MONTH, -2);
-
-        ThreadModel newThread3 = new ThreadModel();
-        newThread3.board = "cgl";
-        newThread3.id = "9201659";
-        newThread3.dateAdded = date3;
-
-        return new ArrayList<>(Arrays.asList(newThread1, newThread2, newThread3));
     }
 
     private void showAddThreadDialog() {
@@ -461,13 +433,13 @@ public class MainActivity extends AppCompatActivity
         latestDate.setTimeInMillis(thread.latestTime * 1000);
 
         final String threadData =
-            thread.getUrl() + "\n\n" +
-            "Added on: " + thread.dateAdded.getTime() + "\n\n" +
-            thread.getSanitizedComment() + "\n\n" +
-            "Posted on: " + createDate.getTime() + "\n\n" +
-            "Latest on: " + latestDate.getTime() + "\n\n" +
-            "Replies: " + thread.replyCount + "\n" +
-            "Images: " + thread.imageCount;
+            "Added on: " + thread.dateAdded.getTime() + "\n" +
+            "Posted on: " + createDate.getTime() + "\n" +
+            "Latest on: " + latestDate.getTime() + "\n" +
+            "Replies: " + thread.replyCount +
+            " | Images: " + thread.imageCount + "\n\n" +
+            thread.getSanitizedComment() + "\n\n";
+
         builder.setMessage(threadData);
 
         final AlertDialog dialog = builder.create();
