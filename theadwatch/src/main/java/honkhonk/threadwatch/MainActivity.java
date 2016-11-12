@@ -1,11 +1,11 @@
 package honkhonk.threadwatch;
 
 import android.app.AlarmManager;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Color;
@@ -17,10 +17,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.app.NotificationCompat;
 import android.text.Editable;
 import android.text.SpannableString;
 import android.text.TextWatcher;
@@ -56,14 +56,17 @@ import honkhonk.threadwatch.adapters.ThreadListAdapter;
 import honkhonk.threadwatch.helpers.Common;
 import honkhonk.threadwatch.helpers.ThreadSorter;
 import honkhonk.threadwatch.models.ThreadModel;
+import honkhonk.threadwatch.receivers.AlarmReceiver;
+import honkhonk.threadwatch.receivers.UpdatedDataReceiver;
 import honkhonk.threadwatch.retrievers.ThreadsRetriever;
 
 public class MainActivity extends AppCompatActivity
         implements ThreadsRetriever.ThreadRetrieverListener,
-        ThreadListAdapter.ThreadListAdapterListener {
+        ThreadListAdapter.ThreadListAdapterListener,
+        UpdatedDataReceiver.UpdatedDataReceiverListener {
     final public static String TAG = MainActivity.class.getSimpleName();
 
-    private int fadeDuration;
+    private UpdatedDataReceiver updatedDataReceiver;
     private SwipeRefreshLayout swipeContainer;
     private ArrayList<ThreadModel> listDataSource = new ArrayList<>();
     private ArrayAdapter<ThreadModel> listAdapter;
@@ -72,6 +75,7 @@ public class MainActivity extends AppCompatActivity
     private ImageView fadeView;
     private TextView noThreadsText;
 
+    private int fadeDuration;
     private int sortMode = 0;
     private boolean sortAscending = false;
 
@@ -79,10 +83,12 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        //scheduleAlarm();
+
+        updatedDataReceiver = new UpdatedDataReceiver(this);
+        LocalBroadcastManager.getInstance(this)
+                .registerReceiver(updatedDataReceiver, new IntentFilter("wtfisthis"));
 
         fadeDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
-
         listView = (ListView) findViewById(R.id.mainList);
         fadeView = (ImageView) findViewById(R.id.fadeView);
         previewWebView = (WebView) findViewById(R.id.previewWebView);
@@ -143,6 +149,7 @@ public class MainActivity extends AppCompatActivity
 
         updateNoThreadsText();
         refresh();
+        scheduleAlarm();
     }
 
     @Override
@@ -223,21 +230,26 @@ public class MainActivity extends AppCompatActivity
         deleteButton.setTitle(s);
     }
 
-    // Setup a recurring alarm every half hour
     public void scheduleAlarm() {
         // Construct an intent that will execute the AlarmReceiver
         Intent intent = new Intent(getApplicationContext(), AlarmReceiver.class);
+
+        final String listDataAsJson = (new Gson()).toJson(listDataSource);
+        intent.putExtra(Common.SAVED_THREAD_DATA, listDataAsJson);
 
         // Create a PendingIntent to be triggered when the alarm goes off
         final PendingIntent pendingIntent =
                 PendingIntent.getBroadcast(this, AlarmReceiver.REQUEST_CODE,
                 intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        long firstMillis = System.currentTimeMillis(); // alarm is set right away
-        AlarmManager alarm = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
+        AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
 
-         alarm.setInexactRepeating(AlarmManager.RTC_WAKEUP, firstMillis,
-                AlarmManager.INTERVAL_HALF_HOUR, pendingIntent);
+        if (pendingIntent != null) {
+            alarm.cancel(pendingIntent);
+        }
+
+        alarm.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(),
+            Common.DEFAULT_REFRESH_TIMEOUT, pendingIntent);
     }
 
     @Override
@@ -259,25 +271,6 @@ public class MainActivity extends AppCompatActivity
             default:
                 return super.onContextItemSelected(item);
         }
-    }
-
-    public void bleh(final View v) {
-        NotificationCompat.Builder builder =
-            (android.support.v7.app.NotificationCompat.Builder)
-                new NotificationCompat.Builder(this)
-                    .setSmallIcon(android.R.drawable.ic_dialog_info)
-                    .setContentTitle("New replies!")
-                    .setContentText("Some thread")
-                    .setPriority(NotificationCompat.PRIORITY_HIGH)
-                    .setDefaults(NotificationCompat.DEFAULT_VIBRATE);
-
-        // Gets an instance of the NotificationManager service
-        NotificationManager mNotifyMgr =
-             (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        // Builds the notification and issues it.
-        mNotifyMgr.notify(345453, builder.build());
-
-        refresh();
     }
 
     /**
@@ -320,6 +313,14 @@ public class MainActivity extends AppCompatActivity
         spinner.setVisibility(ProgressBar.VISIBLE);
     }
 
+    /**
+     * UpdatedDataReceiverListener
+     */
+    public void onNewData(final ArrayList<ThreadModel> threads) {
+        updateList(threads);
+        scheduleAlarm();
+    }
+
     public void fadeViewClicked(final View view) {
         view.animate().alpha(0.0f).setDuration(fadeDuration);
 
@@ -348,6 +349,7 @@ public class MainActivity extends AppCompatActivity
         ThreadSorter.sort(listDataSource, Common.sortOptionsValues[sortMode], sortAscending);
 
         listAdapter.notifyDataSetChanged();
+        scheduleAlarm();
     }
 
     private void refresh() {
@@ -474,6 +476,8 @@ public class MainActivity extends AppCompatActivity
             }
 
         }, anim.getDuration());
+
+        scheduleAlarm();
     }
 
     private void showSortMenu() {
@@ -635,6 +639,7 @@ public class MainActivity extends AppCompatActivity
                 Toast.LENGTH_SHORT).show();
 
         refresh();
+        scheduleAlarm();
     }
 
      private void handleIntent(final Intent intent) {

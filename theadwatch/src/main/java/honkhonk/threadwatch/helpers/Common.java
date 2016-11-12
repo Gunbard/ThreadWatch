@@ -26,4 +26,7 @@ final public class Common {
 
     // Chrome extra key
     final public static String SHARE_TEXT_KEY = "android.intent.extra.TEXT";
+
+    // Default 60 second timeout
+    final public static int DEFAULT_REFRESH_TIMEOUT = 60000;
 }

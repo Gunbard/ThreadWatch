@@ -9,6 +9,11 @@ import java.util.Calendar;
 
 public class ThreadModel {
     /**
+     * Longest allowed length of a truncated string
+     */
+    private static int maxTruncatedLength = 60;
+
+    /**
      * Name of the board
      */
     public String board;
@@ -39,9 +44,14 @@ public class ThreadModel {
     public int replyCount;
 
     /**
-     * Number of new posts since the last check
+     * Number of new posts since the last reset
      */
     public int replyCountDelta;
+
+    /**
+     * Number of new posts since the last check
+     */
+    public int newReplyCount;
 
     /**
      * Number of images in the thread
@@ -116,6 +126,19 @@ public class ThreadModel {
         } else {
             return getSanitizedComment();
         }
+    }
+
+    /**
+     * Truncated title text
+     * @return Truncated title with ellipsis
+     */
+    public String getTruncatedTitle() {
+        String title = getTitle();
+        if (title.length() > maxTruncatedLength) {
+            title = title.substring(0, maxTruncatedLength) + "...";
+        }
+
+        return title;
     }
 
     /**

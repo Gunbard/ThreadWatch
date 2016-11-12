@@ -1,8 +1,11 @@
-package honkhonk.threadwatch;
+package honkhonk.threadwatch.receivers;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+
+import honkhonk.threadwatch.FetcherService;
+import honkhonk.threadwatch.helpers.Common;
 
 /**
  * Created by Gunbard on 10/10/2016.
@@ -16,7 +19,7 @@ public class AlarmReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         Intent i = new Intent(context, FetcherService.class);
-        i.putExtra("foo", "bar");
+        i.putExtra(Common.SAVED_THREAD_DATA, intent.getStringExtra(Common.SAVED_THREAD_DATA));
         context.startService(i);
     }
 }
