@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/thread_menu_notify_toggle"
+        android:title=""/>
     <item android:id="@+id/thread_menu_info"
         android:title="@string/thread_menu_info"/>
     <item android:id="@+id/thread_menu_mark_read"

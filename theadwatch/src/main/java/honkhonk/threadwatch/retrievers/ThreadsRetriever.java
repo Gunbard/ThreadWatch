@@ -1,6 +1,7 @@
 package honkhonk.threadwatch.retrievers;
 
 import android.content.Context;
+import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -13,6 +14,8 @@ import honkhonk.threadwatch.models.ThreadModel;
  */
 
 public class ThreadsRetriever implements PostsRetriever.PostsRetrieverListener {
+    final private static String TAG = ThreadsRetriever.class.getSimpleName();
+
     /**
      * List of listeners to notify about retrieval events
      */
@@ -64,6 +67,8 @@ public class ThreadsRetriever implements PostsRetriever.PostsRetrieverListener {
      * @param threads List of threads to retrieve
      */
     public void retrieveThreadData(final Context context, final ArrayList<ThreadModel> threads) {
+        Log.d(TAG, "Starting thread retrieval");
+
         threadsToRetrieve.addAll(threads);
         processThreadQueue(context);
     }
@@ -81,6 +86,8 @@ public class ThreadsRetriever implements PostsRetriever.PostsRetrieverListener {
     public void postsRetrieved(final Context context,
                                final ThreadModel thread,
                                final ArrayList<PostModel> posts) {
+        Log.d(TAG, "Posts retrieved successfully");
+
         // First post should always be OP
         final PostModel op = posts.get(0);
         final PostModel latest = posts.get(posts.size() - 1);
@@ -109,8 +116,10 @@ public class ThreadsRetriever implements PostsRetriever.PostsRetrieverListener {
      * @param thread The thread the posts were supposed to be retrieved from
      */
     public void postsRetrievalFailed(final Context context, final ThreadModel thread) {
-        thread.notFound = true;
-        failureOccurred = true;
+        Log.d(TAG, "Posts failed to retrieve");
+
+        thread.notFound = !thread.disabled;
+        failureOccurred = !thread.disabled;
         retrievedThreads.add(thread);
         processThreadQueue(context);
     }
@@ -123,9 +132,13 @@ public class ThreadsRetriever implements PostsRetriever.PostsRetrieverListener {
         if (threadsToRetrieve.size() > 0) {
             final ThreadModel threadToGet = threadsToRetrieve.remove(0);
 
-            PostsRetriever postsRetriever = new PostsRetriever();
-            postsRetriever.addListener(this);
-            postsRetriever.retrievePosts(context, threadToGet);
+            if (threadToGet.disabled) {
+                postsRetrievalFailed(context, threadToGet);
+            } else {
+                PostsRetriever postsRetriever = new PostsRetriever();
+                postsRetriever.addListener(this);
+                postsRetriever.retrievePosts(context, threadToGet);
+            }
         } else {
             finishedRetrieving();
         }

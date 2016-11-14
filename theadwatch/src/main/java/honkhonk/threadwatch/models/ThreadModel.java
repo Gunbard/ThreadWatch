@@ -11,7 +11,7 @@ public class ThreadModel {
     /**
      * Longest allowed length of a truncated string
      */
-    private static int maxTruncatedLength = 60;
+    final private static int maxTruncatedLength = 30;
 
     /**
      * Name of the board

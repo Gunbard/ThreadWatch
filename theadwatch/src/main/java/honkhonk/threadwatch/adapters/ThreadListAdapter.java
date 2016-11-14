@@ -81,6 +81,14 @@ public class ThreadListAdapter extends ArrayAdapter<ThreadModel> {
             newPosts.setText("");
         }
 
+        if (thread.disabled) {
+            boardName.setTextColor(ContextCompat.getColor((Context) context,
+                    R.color.colorArchivedThread));
+        } else {
+            boardName.setTextColor(ContextCompat.getColor((Context) context,
+                    android.R.color.tertiary_text_dark));
+        }
+
         if (thread.archived) {
             view.setBackgroundColor(ContextCompat.getColor((Context) context,
                     R.color.colorArchivedThread));

@@ -20,6 +20,8 @@
     <string name="thread_info_dialog_title">Thread Info</string>
 
     <string name="thread_menu_info">Info</string>
+    <string name="thread_menu_disabled">Notification: Disabled</string>
+    <string name="thread_menu_enabled">Notification: Enabled</string>
     <string name="thread_menu_mark_read">Mark as Read</string>
     <string name="thread_menu_delete">Delete</string>
     <string name="thread_menu_deleted">Deleted</string>

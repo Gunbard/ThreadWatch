@@ -28,65 +28,12 @@ import honkhonk.threadwatch.retrievers.ThreadsRetriever;
  */
 public class FetcherService extends IntentService
         implements ThreadsRetriever.ThreadRetrieverListener {
-    // TODO: Rename actions, choose action names that describe tasks that this
-    // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
-    private static final String ACTION_FOO = "honkhonk.threadwatch.action.FOO";
-    private static final String ACTION_BAZ = "honkhonk.threadwatch.action.BAZ";
-
-    // TODO: Rename parameters
-    private static final String EXTRA_PARAM1 = "honkhonk.threadwatch.extra.PARAM1";
-    private static final String EXTRA_PARAM2 = "honkhonk.threadwatch.extra.PARAM2";
-
     public FetcherService() {
-        super("FetcherService");
-    }
-
-    /**
-     * Starts this service to perform action Foo with the given parameters. If
-     * the service is already performing a task this action will be queued.
-     *
-     * @see IntentService
-     */
-    // TODO: Customize helper method
-    public static void startActionFoo(Context context, String param1, String param2) {
-        Intent intent = new Intent(context, FetcherService.class);
-        intent.setAction(ACTION_FOO);
-        intent.putExtra(EXTRA_PARAM1, param1);
-        intent.putExtra(EXTRA_PARAM2, param2);
-        context.startService(intent);
-    }
-
-    /**
-     * Starts this service to perform action Baz with the given parameters. If
-     * the service is already performing a task this action will be queued.
-     *
-     * @see IntentService
-     */
-    // TODO: Customize helper method
-    public static void startActionBaz(Context context, String param1, String param2) {
-        Intent intent = new Intent(context, FetcherService.class);
-        intent.setAction(ACTION_BAZ);
-        intent.putExtra(EXTRA_PARAM1, param1);
-        intent.putExtra(EXTRA_PARAM2, param2);
-        context.startService(intent);
+        super(FetcherService.class.getSimpleName());
     }
 
     @Override
     protected void onHandleIntent(Intent intent) {
-//        if (intent != null) {
-//            final String action = intent.getAction();
-//            if (ACTION_FOO.equals(action)) {
-//                final String param1 = intent.getStringExtra(EXTRA_PARAM1);
-//                final String param2 = intent.getStringExtra(EXTRA_PARAM2);
-//                handleActionFoo(param1, param2);
-//            } else if (ACTION_BAZ.equals(action)) {
-//                final String param1 = intent.getStringExtra(EXTRA_PARAM1);
-//                final String param2 = intent.getStringExtra(EXTRA_PARAM2);
-//                handleActionBaz(param1, param2);
-//            }
-//        }
-
-        // DO WERK
         ConnectivityManager cm =
                 (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 
@@ -95,6 +42,7 @@ public class FetcherService extends IntentService
                 activeNetwork.isConnectedOrConnecting();
 
         if (!isConnected) {
+            // Don't refresh if offline
             return;
         }
 
@@ -160,7 +108,7 @@ public class FetcherService extends IntentService
 
         // Builds the notification and issues it.
         builder.setAutoCancel(true);
-        notificationManager.notify(10001, builder.build());
+        notificationManager.notify(Common.NOTIFICATION_ID, builder.build());
     }
 
     public void threadRetrievalFailed(final ArrayList<ThreadModel> threads) {

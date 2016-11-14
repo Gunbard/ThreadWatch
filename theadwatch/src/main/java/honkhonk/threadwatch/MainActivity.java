@@ -207,6 +207,23 @@ public class MainActivity extends AppCompatActivity
                 return super.onOptionsItemSelected(item);
         }
     }
+    public void scheduleAlarm() {
+        // Construct an intent that will execute the AlarmReceiver
+        Intent intent = new Intent(getApplicationContext(), AlarmReceiver.class);
+
+        final String listDataAsJson = (new Gson()).toJson(listDataSource);
+        intent.putExtra(Common.SAVED_THREAD_DATA, listDataAsJson);
+
+        // Create a PendingIntent to be triggered when the alarm goes off
+        final PendingIntent pendingIntent =
+                PendingIntent.getBroadcast(this, Common.ALARM_ID,
+                        intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        alarm.cancel(pendingIntent);
+        alarm.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(),
+                Common.DEFAULT_REFRESH_TIMEOUT, pendingIntent);
+    }
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v,
@@ -223,6 +240,16 @@ public class MainActivity extends AppCompatActivity
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.thread_action_menu, menu);
 
+        // Set notify toggle state text
+        final AdapterView.AdapterContextMenuInfo info =
+                (AdapterView.AdapterContextMenuInfo) menuInfo;
+        final ThreadModel thread = listDataSource.get(info.position);
+        MenuItem toggleItem = menu.findItem(R.id.thread_menu_notify_toggle);
+        final String toggleText = thread.disabled ?
+                getResources().getString(R.string.thread_menu_disabled) :
+                getResources().getString(R.string.thread_menu_enabled);
+        toggleItem.setTitle(toggleText);
+
         // Set delete button color
         MenuItem deleteButton = menu.findItem(R.id.thread_menu_delete);
         SpannableString s = new SpannableString(deleteButton.getTitle());
@@ -230,38 +257,22 @@ public class MainActivity extends AppCompatActivity
         deleteButton.setTitle(s);
     }
 
-    public void scheduleAlarm() {
-        // Construct an intent that will execute the AlarmReceiver
-        Intent intent = new Intent(getApplicationContext(), AlarmReceiver.class);
-
-        final String listDataAsJson = (new Gson()).toJson(listDataSource);
-        intent.putExtra(Common.SAVED_THREAD_DATA, listDataAsJson);
-
-        // Create a PendingIntent to be triggered when the alarm goes off
-        final PendingIntent pendingIntent =
-                PendingIntent.getBroadcast(this, AlarmReceiver.REQUEST_CODE,
-                intent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-
-        if (pendingIntent != null) {
-            alarm.cancel(pendingIntent);
-        }
-
-        alarm.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(),
-            Common.DEFAULT_REFRESH_TIMEOUT, pendingIntent);
-    }
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         final AdapterView.AdapterContextMenuInfo info =
                 (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        final ThreadModel thread = listDataSource.get(info.position);
+
         switch (item.getItemId()) {
             case R.id.thread_menu_info:
                 showThreadInfo(info.position);
                 return true;
+            case R.id.thread_menu_notify_toggle:
+                thread.disabled = !thread.disabled;
+                listAdapter.notifyDataSetChanged();
+                return true;
             case R.id.thread_menu_mark_read:
-                final ThreadModel thread = listDataSource.get(info.position);
                 thread.replyCountDelta = 0;
                 listAdapter.notifyDataSetChanged();
                 return true;

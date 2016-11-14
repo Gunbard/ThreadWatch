@@ -15,6 +15,12 @@ final public class Common {
         BUMP_DATE
     }
 
+    // Unique request code for refreshing in the background
+    final public static int ALARM_ID = 12345;
+
+    // Unique ID for accessing the notification
+    final public static int NOTIFICATION_ID = 67890;
+
     // Helper to index SortOptions. This is not built into Java for some reason.
     final public static SortOptions[] sortOptionsValues = SortOptions.values();
 
