@@ -1,14 +1,11 @@
 package honkhonk.threadwatch;
 
 import android.app.IntentService;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.NotificationCompat;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -59,19 +56,15 @@ public class FetcherService extends IntentService
      * ThreadRetrieverListener
      */
     public void threadsRetrieved(final ArrayList<ThreadModel> threads) {
-        // TODO: Keep a running total
-        // Only show notification if there's new posts in any thread
-        String updatedThreads = "";
-        int threadsWithReplies = 0;
+        boolean threadWasUpdated = false;
         for (final ThreadModel thread : threads) {
-            if (thread.newReplyCount > 0) {
-                threadsWithReplies++;
-                updatedThreads += thread.getTruncatedTitle() +
-                        " (" + thread.replyCountDelta + ")" + "\n";
+            if (thread.newReplyCount > 0 && !thread.disabled) {
+                threadWasUpdated = true;
+                break;
             }
         }
 
-        if (updatedThreads.length() == 0) {
+        if (!threadWasUpdated) {
             return;
         }
 
@@ -80,35 +73,6 @@ public class FetcherService extends IntentService
         final String listDataAsJson = (new Gson()).toJson(threads);
         newDataIntent.putExtra(Common.SAVED_THREAD_DATA, listDataAsJson);
         LocalBroadcastManager.getInstance(this).sendBroadcast(newDataIntent);
-
-        Intent resultIntent = new Intent(this, MainActivity.class);
-        PendingIntent resultPendingIntent =
-            PendingIntent.getActivity(
-                this,
-                0,
-                resultIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT
-            );
-
-        NotificationCompat.Builder builder =
-            (android.support.v7.app.NotificationCompat.Builder)
-                new NotificationCompat.Builder(this)
-                    .setSmallIcon(R.mipmap.ic_launcher)
-                    .setStyle(new NotificationCompat.BigTextStyle().bigText(updatedThreads))
-                    .setContentTitle("New replies!")
-                    .setContentText("New posts in " +
-                            Integer.toString(threadsWithReplies) + " thread(s).")
-                    .setPriority(NotificationCompat.PRIORITY_HIGH)
-                    .setDefaults(NotificationCompat.DEFAULT_VIBRATE)
-                    .setContentIntent(resultPendingIntent);
-
-        // Gets an instance of the NotificationManager service
-        NotificationManager notificationManager =
-            (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-
-        // Builds the notification and issues it.
-        builder.setAutoCancel(true);
-        notificationManager.notify(Common.NOTIFICATION_ID, builder.build());
     }
 
     public void threadRetrievalFailed(final ArrayList<ThreadModel> threads) {

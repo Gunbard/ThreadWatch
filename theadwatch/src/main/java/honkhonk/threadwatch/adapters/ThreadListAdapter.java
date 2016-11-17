@@ -82,11 +82,9 @@ public class ThreadListAdapter extends ArrayAdapter<ThreadModel> {
         }
 
         if (thread.disabled) {
-            boardName.setTextColor(ContextCompat.getColor((Context) context,
-                    R.color.colorArchivedThread));
+            view.setAlpha(0.5f);
         } else {
-            boardName.setTextColor(ContextCompat.getColor((Context) context,
-                    android.R.color.tertiary_text_dark));
+            view.setAlpha(1.0f);
         }
 
         if (thread.archived) {

@@ -122,7 +122,9 @@ public class ThreadModel {
      */
     public String getTitle() {
         if (subject != null && !subject.equals("")) {
-            return android.text.Html.fromHtml(subject).toString();
+            return android.text.Html.fromHtml(subject)
+                    .toString().replaceAll(System.getProperty("line.separator"), " ");
+
         } else {
             return getSanitizedComment();
         }
@@ -153,9 +155,26 @@ public class ThreadModel {
      */
     public String getSanitizedComment() {
         if (comment != null && !comment.equals("")) {
-            return android.text.Html.fromHtml(comment).toString();
+            return android.text.Html.fromHtml(comment)
+                    .toString().replaceAll(System.getProperty("line.separator"), " ");
         } else {
             return "";
+        }
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return id.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof ThreadModel) {
+            ThreadModel object = (ThreadModel) o;
+            return id.equals(object.id);
+        } else {
+            return false;
         }
     }
 }

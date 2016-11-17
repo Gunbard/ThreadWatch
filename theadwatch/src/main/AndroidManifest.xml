@@ -26,11 +26,6 @@
             </intent-filter>
         </activity>
 
-        <receiver
-            android:name=".receivers.AlarmReceiver"
-            android:process=":remote">
-        </receiver>
-
         <service
             android:name=".FetcherService"
             android:exported="false">
