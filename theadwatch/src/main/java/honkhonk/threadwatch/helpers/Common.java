@@ -29,6 +29,7 @@ final public class Common {
     final public static String SAVED_THREAD_DATA = "SavedThreadData";
     final public static String SAVED_SORT_MODE = "SavedSortMode";
     final public static String SAVED_SORT_ASCENDING = "SavedSortAscending";
+    final public static String SAVED_NOTIFY_ENABLED = "NotificationsEnabled";
 
     // Chrome extra key
     final public static String SHARE_TEXT_KEY = "android.intent.extra.TEXT";

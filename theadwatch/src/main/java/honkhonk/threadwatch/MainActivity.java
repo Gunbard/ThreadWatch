@@ -75,6 +75,7 @@ public class MainActivity extends AppCompatActivity
     private ArrayAdapter<ThreadModel> listAdapter;
     private PendingIntent notificationIntent;
     private HashMap<ThreadModel, Integer> updatedThreads = new HashMap<>();
+    private Menu mainMenu;
 
     private ListView listView;
     private WebView previewWebView;
@@ -84,6 +85,7 @@ public class MainActivity extends AppCompatActivity
     private int fadeDuration;
     private int sortMode = 0;
     private boolean sortAscending = false;
+    private boolean notificationsEnabled = true;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -185,6 +187,8 @@ public class MainActivity extends AppCompatActivity
     public boolean onCreateOptionsMenu(final Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_main, menu);
+        mainMenu = menu;
+        setNotificationEnabledState(notificationsEnabled);
         return true;
     }
 
@@ -197,6 +201,10 @@ public class MainActivity extends AppCompatActivity
                 return true;
             case R.id.menu_refresh:
                 refresh();
+                return true;
+            case R.id.menu_notify:
+                setNotificationEnabledState(!notificationsEnabled);
+                saveData();
                 return true;
             case R.id.menu_add:
                 showAddThreadDialog();
@@ -213,6 +221,7 @@ public class MainActivity extends AppCompatActivity
                 return super.onOptionsItemSelected(item);
         }
     }
+    
     public void scheduleAlarm() {
         AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
 
@@ -230,8 +239,10 @@ public class MainActivity extends AppCompatActivity
                 PendingIntent.getService(this, Common.ALARM_ID,
                         intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        alarm.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(),
-                Common.DEFAULT_REFRESH_TIMEOUT, notificationIntent);
+        alarm.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                Common.DEFAULT_REFRESH_TIMEOUT,
+                Common.DEFAULT_REFRESH_TIMEOUT,
+                notificationIntent);
     }
 
     @Override
@@ -341,6 +352,10 @@ public class MainActivity extends AppCompatActivity
         updateList(threads);
         scheduleAlarm();
 
+        if (!notificationsEnabled) {
+            return;
+        }
+
         String updatedThreadsText = "";
 
         for (final ThreadModel thread : threads) {
@@ -421,6 +436,17 @@ public class MainActivity extends AppCompatActivity
 
         listAdapter.notifyDataSetChanged();
         scheduleAlarm();
+    }
+
+    private void setNotificationEnabledState(final boolean enabled) {
+        notificationsEnabled = enabled;
+
+        MenuItem notificationItem = mainMenu.findItem(R.id.menu_notify);
+        if (notificationsEnabled) {
+            notificationItem.setIcon(R.drawable.ic_notifications_active_white_24dp);
+        } else {
+            notificationItem.setIcon(R.drawable.ic_notifications_off_white_24dp);
+        }
     }
 
     private void refresh() {
@@ -638,6 +664,7 @@ public class MainActivity extends AppCompatActivity
         editor.putString(Common.SAVED_THREAD_DATA, listDataAsJson);
         editor.putInt(Common.SAVED_SORT_MODE, sortMode);
         editor.putBoolean(Common.SAVED_SORT_ASCENDING, sortAscending);
+        editor.putBoolean(Common.SAVED_NOTIFY_ENABLED, notificationsEnabled);
         editor.apply();
     }
 
@@ -646,6 +673,7 @@ public class MainActivity extends AppCompatActivity
         final String listDataAsJson = savedPrefs.getString(Common.SAVED_THREAD_DATA, null);
         sortMode = savedPrefs.getInt(Common.SAVED_SORT_MODE, 0);
         sortAscending = savedPrefs.getBoolean(Common.SAVED_SORT_ASCENDING, false);
+        notificationsEnabled = savedPrefs.getBoolean(Common.SAVED_NOTIFY_ENABLED, false);
 
         if (listDataAsJson == null) {
             return false;
