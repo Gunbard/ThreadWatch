@@ -17,6 +17,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -86,6 +87,7 @@ public class MainActivity extends AppCompatActivity
     private int sortMode = 0;
     private boolean sortAscending = false;
     private boolean notificationsEnabled = true;
+    private int refreshRate = 5;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -176,6 +178,20 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == Common.SETTINGS_CLOSED_ID) {
+            // Update refresh rate
+            final SharedPreferences savedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+            final String refreshValue = savedPrefs.getString("pref_refresh_rate", "5");
+            if (refreshValue.length() > 0) {
+                refreshRate = Integer.parseInt(refreshValue);
+                scheduleAlarm();
+            }
+        }
+    }
+
+    @Override
     protected void onNewIntent(Intent intent)
     {
         super.onNewIntent(intent);
@@ -210,13 +226,13 @@ public class MainActivity extends AppCompatActivity
                 showAddThreadDialog();
                 return true;
             case R.id.menu_settings:
-                final Intent settingsIntent = new Intent(this, SettingsActivity.class);
-                startActivity(settingsIntent);
+                startActivityForResult(
+                    new Intent(this, SettingsActivity.class), Common.SETTINGS_CLOSED_ID);
                 return true;
-            case R.id.menu_help:
-                return true;
-            case R.id.menu_about:
-                return true;
+//            case R.id.menu_help:
+//                return true;
+//            case R.id.menu_about:
+//                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -240,8 +256,8 @@ public class MainActivity extends AppCompatActivity
                         intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         alarm.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                Common.DEFAULT_REFRESH_TIMEOUT,
-                Common.DEFAULT_REFRESH_TIMEOUT,
+                Common.ONE_MINUTE_IN_MILLIS * refreshRate,
+                Common.ONE_MINUTE_IN_MILLIS * refreshRate,
                 notificationIntent);
     }
 
