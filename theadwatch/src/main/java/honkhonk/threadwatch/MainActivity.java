@@ -135,6 +135,8 @@ public class MainActivity extends AppCompatActivity
                         new Intent(Intent.ACTION_VIEW, Uri.parse(url));
                 thread.replyCountDelta = 0;
                 listAdapter.notifyDataSetChanged();
+                saveData();
+                scheduleAlarm();
                 startActivity(browserIntent);
             }
         };
@@ -186,6 +188,7 @@ public class MainActivity extends AppCompatActivity
             final String refreshValue = savedPrefs.getString("pref_refresh_rate", "5");
             if (refreshValue.length() > 0) {
                 refreshRate = Integer.parseInt(refreshValue);
+                saveData();
                 scheduleAlarm();
             }
         }
@@ -312,6 +315,8 @@ public class MainActivity extends AppCompatActivity
             case R.id.thread_menu_mark_read:
                 thread.replyCountDelta = 0;
                 listAdapter.notifyDataSetChanged();
+                saveData();
+                scheduleAlarm();
                 return true;
             case R.id.thread_menu_delete:
                 deleteThread(info.position);
@@ -688,6 +693,7 @@ public class MainActivity extends AppCompatActivity
         final SharedPreferences savedPrefs = getSharedPreferences(Common.PREFS_NAME, 0);
         final String listDataAsJson = savedPrefs.getString(Common.SAVED_THREAD_DATA, null);
         sortMode = savedPrefs.getInt(Common.SAVED_SORT_MODE, 0);
+        refreshRate = Integer.parseInt(savedPrefs.getString("pref_refresh_rate", "5"));
         sortAscending = savedPrefs.getBoolean(Common.SAVED_SORT_ASCENDING, false);
         notificationsEnabled = savedPrefs.getBoolean(Common.SAVED_NOTIFY_ENABLED, false);
 
