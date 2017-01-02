@@ -256,7 +256,7 @@ public class MainActivity extends AppCompatActivity
         // Create a PendingIntent to be triggered when the alarm goes off
         notificationIntent =
                 PendingIntent.getService(this, Common.ALARM_ID,
-                        intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                        intent, PendingIntent.FLAG_CANCEL_CURRENT);
 
         alarm.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                 Common.ONE_MINUTE_IN_MILLIS * refreshRate,
