@@ -782,9 +782,7 @@ public class MainActivity extends AppCompatActivity
              addThread(threadUrl);
          }
 
-         if (intent.getStringExtra("cheese") != null) {
-             updatedThreads = new HashMap<>();
-         }
+         updatedThreads = new HashMap<>();
      }
 
     private View getViewByPosition(int pos, ListView listView) {
