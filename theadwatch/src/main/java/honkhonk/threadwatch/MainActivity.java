@@ -185,13 +185,15 @@ public class MainActivity extends AppCompatActivity
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == Common.SETTINGS_CLOSED_ID) {
             // Update refresh rate
-            final SharedPreferences savedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-            final String refreshValue = savedPrefs.getString("pref_refresh_rate", "5");
+            final SharedPreferences appSettings =
+                    PreferenceManager.getDefaultSharedPreferences(this);
+
+            final String refreshValue = appSettings.getString("pref_refresh_rate", "5");
             if (refreshValue.length() > 0) {
                 refreshRate = Integer.parseInt(refreshValue);
             }
 
-            vibrateNotify = savedPrefs.getBoolean(Common.SAVED_NOTIFY_VIBRATE, true);
+            vibrateNotify = appSettings.getBoolean("pref_notify_vibrate", true);
             saveData();
             scheduleAlarm();
         }
@@ -692,16 +694,16 @@ public class MainActivity extends AppCompatActivity
         editor.putInt(Common.SAVED_SORT_MODE, sortMode);
         editor.putBoolean(Common.SAVED_SORT_ASCENDING, sortAscending);
         editor.putBoolean(Common.SAVED_NOTIFY_ENABLED, notificationsEnabled);
-        editor.putBoolean(Common.SAVED_NOTIFY_VIBRATE, vibrateNotify);
         editor.apply();
     }
 
     private boolean restoreData() {
         final SharedPreferences savedPrefs = getSharedPreferences(Common.PREFS_NAME, 0);
+        final SharedPreferences appSettings = PreferenceManager.getDefaultSharedPreferences(this);
         final String listDataAsJson = savedPrefs.getString(Common.SAVED_THREAD_DATA, null);
         sortMode = savedPrefs.getInt(Common.SAVED_SORT_MODE, 0);
-        refreshRate = Integer.parseInt(savedPrefs.getString("pref_refresh_rate", "5"));
-        vibrateNotify = savedPrefs.getBoolean(Common.SAVED_NOTIFY_VIBRATE, true);
+        refreshRate = Integer.parseInt(appSettings.getString("pref_refresh_rate", "5"));
+        vibrateNotify = appSettings.getBoolean("pref_notify_vibrate", true);
         sortAscending = savedPrefs.getBoolean(Common.SAVED_SORT_ASCENDING, false);
         notificationsEnabled = savedPrefs.getBoolean(Common.SAVED_NOTIFY_ENABLED, false);
 
