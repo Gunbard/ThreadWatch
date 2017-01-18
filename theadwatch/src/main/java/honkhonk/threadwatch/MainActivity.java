@@ -87,6 +87,7 @@ public class MainActivity extends AppCompatActivity
     private int sortMode = 0;
     private boolean sortAscending = false;
     private boolean notificationsEnabled = true;
+    private boolean vibrateNotify = true;
     private int refreshRate = 5;
 
     @Override
@@ -188,9 +189,11 @@ public class MainActivity extends AppCompatActivity
             final String refreshValue = savedPrefs.getString("pref_refresh_rate", "5");
             if (refreshValue.length() > 0) {
                 refreshRate = Integer.parseInt(refreshValue);
-                saveData();
-                scheduleAlarm();
             }
+
+            vibrateNotify = savedPrefs.getBoolean(Common.SAVED_NOTIFY_VIBRATE, true);
+            saveData();
+            scheduleAlarm();
         }
     }
 
@@ -218,9 +221,9 @@ public class MainActivity extends AppCompatActivity
             case R.id.menu_sort:
                 showSortMenu();
                 return true;
-            case R.id.menu_refresh:
+            /*case R.id.menu_refresh:
                 refresh();
-                return true;
+                return true;*/
             case R.id.menu_notify:
                 setNotificationEnabledState(!notificationsEnabled);
                 saveData();
@@ -407,6 +410,9 @@ public class MainActivity extends AppCompatActivity
                 PendingIntent.FLAG_UPDATE_CURRENT
             );
 
+        final int defaults = vibrateNotify ? NotificationCompat.DEFAULT_ALL :
+                NotificationCompat.DEFAULT_LIGHTS | NotificationCompat.DEFAULT_SOUND;
+
         NotificationCompat.Builder builder =
             (android.support.v7.app.NotificationCompat.Builder)
                 new NotificationCompat.Builder(this)
@@ -416,7 +422,7 @@ public class MainActivity extends AppCompatActivity
                     .setContentText("New posts in " +
                             Integer.toString(updatedThreads.size()) + " thread(s).")
                     .setPriority(NotificationCompat.PRIORITY_HIGH)
-                    .setDefaults(NotificationCompat.DEFAULT_VIBRATE)
+                    .setDefaults(defaults)
                     .setContentIntent(resultPendingIntent);
 
         // Gets an instance of the NotificationManager service
@@ -686,6 +692,7 @@ public class MainActivity extends AppCompatActivity
         editor.putInt(Common.SAVED_SORT_MODE, sortMode);
         editor.putBoolean(Common.SAVED_SORT_ASCENDING, sortAscending);
         editor.putBoolean(Common.SAVED_NOTIFY_ENABLED, notificationsEnabled);
+        editor.putBoolean(Common.SAVED_NOTIFY_VIBRATE, vibrateNotify);
         editor.apply();
     }
 
@@ -694,6 +701,7 @@ public class MainActivity extends AppCompatActivity
         final String listDataAsJson = savedPrefs.getString(Common.SAVED_THREAD_DATA, null);
         sortMode = savedPrefs.getInt(Common.SAVED_SORT_MODE, 0);
         refreshRate = Integer.parseInt(savedPrefs.getString("pref_refresh_rate", "5"));
+        vibrateNotify = savedPrefs.getBoolean(Common.SAVED_NOTIFY_VIBRATE, true);
         sortAscending = savedPrefs.getBoolean(Common.SAVED_SORT_ASCENDING, false);
         notificationsEnabled = savedPrefs.getBoolean(Common.SAVED_NOTIFY_ENABLED, false);
 
@@ -782,7 +790,12 @@ public class MainActivity extends AppCompatActivity
              addThread(threadUrl);
          }
 
+         // Reset counter and clear notification when returning to app
          updatedThreads = new HashMap<>();
+
+         NotificationManager notificationManager =
+                 (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+         notificationManager.cancel(Common.NOTIFICATION_ID);
      }
 
     private View getViewByPosition(int pos, ListView listView) {

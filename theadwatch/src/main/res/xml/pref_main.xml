@@ -14,6 +14,11 @@
             android:positiveButtonText="@null"
             android:title="@string/pref_refresh_rate" />
 
+        <SwitchPreference
+            android:key="pref_notify_vibrate"
+            android:title="@string/pref_notify_vibrate"
+            android:checked="true" />
+
         <!-- Allows the user to choose a ringtone in the 'notification' category. -->
         <!-- NOTE: This preference will be enabled only when the checkbox above is checked. -->
         <!-- NOTE: RingtonePreference's summary should be set to its value by the activity code. -->
