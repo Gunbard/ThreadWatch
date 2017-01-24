@@ -18,16 +18,16 @@
         android:id="@+id/boardTitle"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:textSize="24sp"
+        android:textSize="@dimen/add_thread_input_padding"
         android:gravity="center"
         android:padding="8dp"
         android:layout_alignParentEnd="false"
         android:layout_alignParentLeft="true"
-        android:text="/vr/"
-        android:layout_width="72dp"
+        android:text="/news/"
         android:maxLines="1"
         android:clickable="false"
-        android:contextClickable="true" />
+        android:contextClickable="true"
+        android:layout_width="70sp" />
 
     <TextView
         android:layout_alignParentTop="false"

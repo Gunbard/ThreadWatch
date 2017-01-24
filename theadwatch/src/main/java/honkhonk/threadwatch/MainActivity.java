@@ -17,6 +17,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
@@ -87,6 +88,7 @@ public class MainActivity extends AppCompatActivity
     private int sortMode = 0;
     private boolean sortAscending = false;
     private boolean notificationsEnabled = true;
+    private boolean canVibrate = true;
     private boolean vibrateNotify = true;
     private int refreshRate = 5;
 
@@ -104,6 +106,9 @@ public class MainActivity extends AppCompatActivity
         fadeView = (ImageView) findViewById(R.id.fadeView);
         previewWebView = (WebView) findViewById(R.id.previewWebView);
         noThreadsText = (TextView) findViewById(R.id.noThreadsText);
+
+        final Vibrator vibrator = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
+        canVibrate = vibrator.hasVibrator();
 
         previewWebView.setWebViewClient(new WebViewClient() {
             @Override
@@ -234,8 +239,9 @@ public class MainActivity extends AppCompatActivity
                 showAddThreadDialog();
                 return true;
             case R.id.menu_settings:
-                startActivityForResult(
-                    new Intent(this, SettingsActivity.class), Common.SETTINGS_CLOSED_ID);
+                Intent settingsIntent = new Intent(this, SettingsActivity.class);
+                settingsIntent.putExtra(Common.PREFS_CAN_VIBRATE, canVibrate);
+                startActivityForResult(settingsIntent, Common.SETTINGS_CLOSED_ID);
                 return true;
 //            case R.id.menu_help:
 //                return true;
@@ -261,7 +267,7 @@ public class MainActivity extends AppCompatActivity
         // Create a PendingIntent to be triggered when the alarm goes off
         notificationIntent =
                 PendingIntent.getService(this, Common.ALARM_ID,
-                        intent, PendingIntent.FLAG_CANCEL_CURRENT);
+                        intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         alarm.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                 Common.ONE_MINUTE_IN_MILLIS * refreshRate,
@@ -412,7 +418,7 @@ public class MainActivity extends AppCompatActivity
                 PendingIntent.FLAG_UPDATE_CURRENT
             );
 
-        final int defaults = vibrateNotify ? NotificationCompat.DEFAULT_ALL :
+        final int defaults = (vibrateNotify && canVibrate) ? NotificationCompat.DEFAULT_ALL :
                 NotificationCompat.DEFAULT_LIGHTS | NotificationCompat.DEFAULT_SOUND;
 
         NotificationCompat.Builder builder =
@@ -427,6 +433,10 @@ public class MainActivity extends AppCompatActivity
                     .setDefaults(defaults)
                     .setContentIntent(resultPendingIntent);
 
+        if (!vibrateNotify) {
+            // Workaround to prevent vibrate even when the device is in vibrate mode
+            builder.setVibrate(new long[]{0L});
+        }
         // Gets an instance of the NotificationManager service
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -705,7 +715,7 @@ public class MainActivity extends AppCompatActivity
         refreshRate = Integer.parseInt(appSettings.getString("pref_refresh_rate", "5"));
         vibrateNotify = appSettings.getBoolean("pref_notify_vibrate", true);
         sortAscending = savedPrefs.getBoolean(Common.SAVED_SORT_ASCENDING, false);
-        notificationsEnabled = savedPrefs.getBoolean(Common.SAVED_NOTIFY_ENABLED, false);
+        notificationsEnabled = savedPrefs.getBoolean(Common.SAVED_NOTIFY_ENABLED, true);
 
         if (listDataAsJson == null) {
             return false;
@@ -792,12 +802,8 @@ public class MainActivity extends AppCompatActivity
              addThread(threadUrl);
          }
 
-         // Reset counter and clear notification when returning to app
-         updatedThreads = new HashMap<>();
-
-         NotificationManager notificationManager =
-                 (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-         notificationManager.cancel(Common.NOTIFICATION_ID);
+         // Reset count
+         updatedThreads.clear();
      }
 
     private View getViewByPosition(int pos, ListView listView) {

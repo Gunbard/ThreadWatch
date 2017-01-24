@@ -17,7 +17,8 @@
         <SwitchPreference
             android:key="pref_notify_vibrate"
             android:title="@string/pref_notify_vibrate"
-            android:checked="true" />
+            android:checked="true"
+            android:defaultValue="true"/>
 
         <!-- Allows the user to choose a ringtone in the 'notification' category. -->
         <!-- NOTE: This preference will be enabled only when the checkbox above is checked. -->

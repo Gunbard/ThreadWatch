@@ -62,4 +62,5 @@
     </string-array>
 
     <string name="pref_notify_vibrate">Vibrate notifications</string>
+    <string name="pref_notify_vibrate_disabled">Your device cannot vibrate!</string>
 </resources>

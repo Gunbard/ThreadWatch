@@ -15,6 +15,8 @@ import android.support.v7.app.ActionBar;
 import android.text.TextUtils;
 import android.view.MenuItem;
 
+import honkhonk.threadwatch.helpers.Common;
+
 public class SettingsActivity extends AppCompatPreferenceActivity {
     /**
      * A preference value change listener that updates the preference's summary
@@ -131,6 +133,17 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             // updated to reflect the new value, per the Android Design
             // guidelines.
             bindPreferenceSummaryToValue(findPreference("pref_refresh_rate"));
+
+            final Boolean canVibrate = getActivity()
+                .getIntent().getExtras().getBoolean(Common.PREFS_CAN_VIBRATE, true);
+
+            final Preference vibratePref = findPreference("pref_notify_vibrate");
+            if (!canVibrate) {
+                vibratePref.setEnabled(false);
+                vibratePref.setSummary(getResources()
+                    .getString(R.string.pref_notify_vibrate_disabled));
+            }
+
         }
 
         @Override

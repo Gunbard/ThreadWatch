@@ -60,7 +60,7 @@
     <WebView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginLeft="72dp"
+        android:layout_marginLeft="70dp"
         android:id="@+id/previewWebView"
         android:elevation="3dp"
         android:visibility="gone">
