@@ -1,6 +1,10 @@
 package honkhonk.threadwatch.retrievers;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.util.Log;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -12,6 +16,8 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
+import honkhonk.threadwatch.MainActivity;
+import honkhonk.threadwatch.R;
 import honkhonk.threadwatch.ThreadWatch;
 import honkhonk.threadwatch.models.PostModel;
 import honkhonk.threadwatch.models.PostsResponse;
@@ -64,6 +70,22 @@ public class PostsRetriever {
      * @param thread The thread to retrieve posts from. Must have the board and id set.
      */
     public void retrievePosts(final Context context, final ThreadModel thread) {
+        ConnectivityManager cm =
+                (ConnectivityManager) context
+                        .getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+
+        if (!isConnected) {
+            Log.i(this.getClass().getSimpleName(), "No network, so didn't refresh!");
+            for (final PostsRetrieverListener listener : listeners) {
+                listener.postsRetrievalFailed(context, thread);
+            }
+            return;
+        }
+
         final String url =
                 "https://a.4cdn.org/"+ thread.board + "/thread/" + thread.id + ".json";
 
