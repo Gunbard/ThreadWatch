@@ -698,6 +698,8 @@ public class MainActivity extends AppCompatActivity
 
     private void saveData() {
         final String listDataAsJson = (new Gson()).toJson(listDataSource);
+        Log.i(TAG, "List data: " + listDataAsJson);
+
         SharedPreferences settings = getSharedPreferences(Common.PREFS_NAME, 0);
         SharedPreferences.Editor editor = settings.edit();
         editor.putString(Common.SAVED_THREAD_DATA, listDataAsJson);
