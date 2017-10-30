@@ -13,7 +13,7 @@
 
     <string name="no_threads_message">You aren\'t watching any threads. Add some!</string>
     <string name="refresh_error">Unable to refresh threads. Check network connection.</string>
-    <string name="no_thread_data">Unable to retrieve thread data</string>
+    <string name="no_thread_data"> </string>
     <string name="refresh_for_thread_data">Refresh to get thread data</string>
     <string name="invalid_thread_url">Not a valid thread url</string>
     <string name="duplicate_thread">Thread is already being watched</string>
@@ -64,4 +64,9 @@
     <string name="pref_category_notifications">Notifications</string>
     <string name="pref_notify_vibrate">Vibrate</string>
     <string name="pref_notify_vibrate_disabled">Your device cannot vibrate!</string>
+    <string name="pref_notify_vibrate_sysmanaged">Manage notification vibration in the Android notification settings!</string>
+
+
+    <string name="notification_channel_name_updated_thread">Thread Updated</string>
+    <string name="notification_channel_desc_updated_thread">New posts in a thread</string>
 </resources>

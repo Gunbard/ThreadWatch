@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
@@ -134,7 +135,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             // guidelines.
             bindPreferenceSummaryToValue(findPreference("pref_refresh_rate"));
 
-            final Boolean canVibrate = getActivity()
+            final boolean canVibrate = getActivity()
                 .getIntent().getExtras().getBoolean(Common.PREFS_CAN_VIBRATE, true);
 
             final Preference vibratePref = findPreference("pref_notify_vibrate");
@@ -142,6 +143,9 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 vibratePref.setEnabled(false);
                 vibratePref.setSummary(getResources()
                     .getString(R.string.pref_notify_vibrate_disabled));
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                vibratePref.setEnabled(false);
+                vibratePref.setSummary(R.string.pref_notify_vibrate_sysmanaged);
             }
 
         }
