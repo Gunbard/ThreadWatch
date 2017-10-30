@@ -1,8 +1,8 @@
 package honkhonk.threadwatch;
 
 import android.app.AlarmManager;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -24,7 +24,6 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.app.NotificationCompat;
 import android.text.Editable;
 import android.text.SpannableString;
 import android.text.TextWatcher;
@@ -55,8 +54,6 @@ import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
 
 import honkhonk.threadwatch.adapters.ThreadListAdapter;
 import honkhonk.threadwatch.helpers.Common;
@@ -71,12 +68,18 @@ public class MainActivity extends AppCompatActivity
         UpdatedDataReceiver.UpdatedDataReceiverListener {
     final public static String TAG = MainActivity.class.getSimpleName();
 
-    private UpdatedDataReceiver updatedDataReceiver;
+    final private BroadcastReceiver updatedThreadsReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "Threads were updated!");
+            refreshList();
+        }
+    };
+
     private SwipeRefreshLayout swipeContainer;
     private ArrayList<ThreadModel> listDataSource = new ArrayList<>();
     private ArrayAdapter<ThreadModel> listAdapter;
     private PendingIntent notificationIntent;
-    private HashMap<ThreadModel, Integer> updatedThreads = new HashMap<>();
     private Menu mainMenu;
 
     private ListView listView;
@@ -97,9 +100,8 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        updatedDataReceiver = new UpdatedDataReceiver(this);
         LocalBroadcastManager.getInstance(this)
-                .registerReceiver(updatedDataReceiver, new IntentFilter("wtfisthis"));
+                .registerReceiver(updatedThreadsReceiver, new IntentFilter("wtfisthis"));
 
         fadeDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
         listView = (ListView) findViewById(R.id.mainList);
@@ -142,7 +144,7 @@ public class MainActivity extends AppCompatActivity
                 thread.replyCountDelta = 0;
                 listAdapter.notifyDataSetChanged();
                 saveData();
-                scheduleAlarm();
+                //scheduleAlarm();
                 startActivity(browserIntent);
             }
         };
@@ -185,6 +187,13 @@ public class MainActivity extends AppCompatActivity
         intent.setData(null);
     }
 
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(updatedThreadsReceiver);
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -200,7 +209,7 @@ public class MainActivity extends AppCompatActivity
 
             vibrateNotify = appSettings.getBoolean("pref_notify_vibrate", true);
             saveData();
-            scheduleAlarm();
+            //scheduleAlarm();
         }
     }
 
@@ -261,8 +270,8 @@ public class MainActivity extends AppCompatActivity
 
         Intent intent = new Intent(getApplicationContext(), FetcherService.class);
 
-        final String listDataAsJson = (new Gson()).toJson(listDataSource);
-        intent.putExtra(Common.SAVED_THREAD_DATA, listDataAsJson);
+        //final String listDataAsJson = (new Gson()).toJson(listDataSource);
+        //intent.putExtra(Common.SAVED_THREAD_DATA, listDataAsJson);
 
         // Create a PendingIntent to be triggered when the alarm goes off
         notificationIntent =
@@ -320,14 +329,13 @@ public class MainActivity extends AppCompatActivity
                 return true;
             case R.id.thread_menu_notify_toggle:
                 thread.disabled = !thread.disabled;
-                listAdapter.notifyDataSetChanged();
-                scheduleAlarm();
+                saveData();
+                refreshList();
                 return true;
             case R.id.thread_menu_mark_read:
                 thread.replyCountDelta = 0;
-                listAdapter.notifyDataSetChanged();
                 saveData();
-                scheduleAlarm();
+                refreshList();
                 return true;
             case R.id.thread_menu_delete:
                 deleteThread(info.position);
@@ -381,69 +389,69 @@ public class MainActivity extends AppCompatActivity
      * UpdatedDataReceiverListener
      */
     public void onNewData(final ArrayList<ThreadModel> threads) {
-        updateList(threads);
-        scheduleAlarm();
-
-        if (!notificationsEnabled) {
-            return;
-        }
-
-        String updatedThreadsText = "";
-
-        for (final ThreadModel thread : threads) {
-            if (thread.newReplyCount > 0 && !thread.disabled) {
-                Integer runningTotal = updatedThreads.get(thread);
-                if (runningTotal != null) {
-                    final Integer newTotal = runningTotal + thread.newReplyCount;
-                    updatedThreads.put(thread, newTotal);
-                } else {
-                    updatedThreads.put(thread, thread.newReplyCount);
-                }
-            }
-        }
-
-        for (Map.Entry<ThreadModel, Integer> entry : updatedThreads.entrySet()) {
-            updatedThreadsText += entry.getKey().getTruncatedTitle() +
-                    " (+" + entry.getValue() + ")" + "\n";
-        }
-
-        Intent resultIntent = new Intent(this, MainActivity.class);
-        resultIntent.putExtra("cheese", "yes");
-
-        PendingIntent resultPendingIntent =
-            PendingIntent.getActivity(
-                this,
-                0,
-                resultIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT
-            );
-
-        final int defaults = (vibrateNotify && canVibrate) ? NotificationCompat.DEFAULT_ALL :
-                NotificationCompat.DEFAULT_LIGHTS | NotificationCompat.DEFAULT_SOUND;
-
-        NotificationCompat.Builder builder =
-            (android.support.v7.app.NotificationCompat.Builder)
-                new NotificationCompat.Builder(this)
-                    .setSmallIcon(R.mipmap.ic_launcher)
-                    .setStyle(new NotificationCompat.BigTextStyle().bigText(updatedThreadsText))
-                    .setContentTitle("New replies!")
-                    .setContentText("New posts in " +
-                            Integer.toString(updatedThreads.size()) + " thread(s).")
-                    .setPriority(NotificationCompat.PRIORITY_HIGH)
-                    .setDefaults(defaults)
-                    .setContentIntent(resultPendingIntent);
-
-        if (!vibrateNotify) {
-            // Workaround to prevent vibrate even when the device is in vibrate mode
-            builder.setVibrate(new long[]{0L});
-        }
-        // Gets an instance of the NotificationManager service
-        NotificationManager notificationManager =
-                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-
-        // Builds the notification and issues it.
-        builder.setAutoCancel(true);
-        notificationManager.notify(Common.NOTIFICATION_ID, builder.build());
+//        updateList(threads);
+//        scheduleAlarm();
+//
+//        if (!notificationsEnabled) {
+//            return;
+//        }
+//
+//        String updatedThreadsText = "";
+//
+//        for (final ThreadModel thread : threads) {
+//            if (thread.newReplyCount > 0 && !thread.disabled) {
+//                Integer runningTotal = updatedThreads.get(thread);
+//                if (runningTotal != null) {
+//                    final Integer newTotal = runningTotal + thread.newReplyCount;
+//                    updatedThreads.put(thread, newTotal);
+//                } else {
+//                    updatedThreads.put(thread, thread.newReplyCount);
+//                }
+//            }
+//        }
+//
+//        for (Map.Entry<ThreadModel, Integer> entry : updatedThreads.entrySet()) {
+//            updatedThreadsText += entry.getKey().getTruncatedTitle() +
+//                    " (+" + entry.getValue() + ")" + "\n";
+//        }
+//
+//        Intent resultIntent = new Intent(this, MainActivity.class);
+//        resultIntent.putExtra("cheese", "yes");
+//
+//        PendingIntent resultPendingIntent =
+//            PendingIntent.getActivity(
+//                this,
+//                0,
+//                resultIntent,
+//                PendingIntent.FLAG_UPDATE_CURRENT
+//            );
+//
+//        final int defaults = (vibrateNotify && canVibrate) ? NotificationCompat.DEFAULT_ALL :
+//                NotificationCompat.DEFAULT_LIGHTS | NotificationCompat.DEFAULT_SOUND;
+//
+//        NotificationCompat.Builder builder =
+//            (android.support.v7.app.NotificationCompat.Builder)
+//                new NotificationCompat.Builder(this)
+//                    .setSmallIcon(R.mipmap.ic_launcher)
+//                    .setStyle(new NotificationCompat.BigTextStyle().bigText(updatedThreadsText))
+//                    .setContentTitle("New replies!")
+//                    .setContentText("New posts in " +
+//                            Integer.toString(updatedThreads.size()) + " thread(s).")
+//                    .setPriority(NotificationCompat.PRIORITY_HIGH)
+//                    .setDefaults(defaults)
+//                    .setContentIntent(resultPendingIntent);
+//
+//        if (!vibrateNotify) {
+//            // Workaround to prevent vibrate even when the device is in vibrate mode
+//            builder.setVibrate(new long[]{0L});
+//        }
+//        // Gets an instance of the NotificationManager service
+//        NotificationManager notificationManager =
+//                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+//
+//        // Builds the notification and issues it.
+//        builder.setAutoCancel(true);
+//        notificationManager.notify(Common.NOTIFICATION_ID, builder.build());
     }
 
     public void fadeViewClicked(final View view) {
@@ -474,7 +482,7 @@ public class MainActivity extends AppCompatActivity
         ThreadSorter.sort(listDataSource, Common.sortOptionsValues[sortMode], sortAscending);
 
         listAdapter.notifyDataSetChanged();
-        scheduleAlarm();
+        //scheduleAlarm();
     }
 
     private void setNotificationEnabledState(final boolean enabled) {
@@ -595,7 +603,7 @@ public class MainActivity extends AppCompatActivity
                 final ThreadModel removedThread = listDataSource.remove(position);
                 listAdapter.notifyDataSetChanged();
                 updateNoThreadsText();
-                scheduleAlarm();
+                //scheduleAlarm();
 
                 Snackbar.make(findViewById(android.R.id.content),
                         getResources().getString(R.string.thread_menu_deleted) +  " " +
@@ -607,7 +615,7 @@ public class MainActivity extends AppCompatActivity
                                 listAdapter.insert(removedThread, position);
                                 listAdapter.notifyDataSetChanged();
                                 updateNoThreadsText();
-                                scheduleAlarm();
+                                //scheduleAlarm();
                             }
                         })
                         .show();
@@ -616,6 +624,7 @@ public class MainActivity extends AppCompatActivity
         }, anim.getDuration());
 
         saveData();
+        refreshList();
     }
 
     private void showSortMenu() {
@@ -728,6 +737,23 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    private void refreshList() {
+        final SharedPreferences savedPrefs = getSharedPreferences(Common.PREFS_NAME, 0);
+        final String listDataAsJson = savedPrefs.getString(Common.SAVED_THREAD_DATA, null);
+
+        if (listDataAsJson == null) {
+            return;
+        }
+
+        listDataSource = (new Gson()).fromJson(listDataAsJson,
+                new TypeToken<ArrayList<ThreadModel>>() {}.getType());
+
+        // Sort threads
+        ThreadSorter.sort(listDataSource, Common.sortOptionsValues[sortMode], sortAscending);
+
+        listAdapter.notifyDataSetChanged();
+    }
+
     private void addThread(final String threadUrl) {
         if (threadUrl == null || threadUrl.length() == 0) {
             return;
@@ -785,9 +811,8 @@ public class MainActivity extends AppCompatActivity
                 Toast.LENGTH_SHORT).show();
 
         saveData();
-
         refresh();
-        scheduleAlarm();
+        //scheduleAlarm();
     }
 
      private void handleIntent(final Intent intent) {
@@ -803,10 +828,16 @@ public class MainActivity extends AppCompatActivity
              }
 
              addThread(threadUrl);
+             return;
          }
 
-         // Reset count
-         updatedThreads.clear();
+         final Bundle extras = intent.getExtras();
+         if (extras != null && extras.getString("cheese") != null &&
+                 extras.getString("cheese").equals("yes")) {
+             Intent newIntent = new Intent("wtfistreds");
+             LocalBroadcastManager.getInstance(this).sendBroadcast(newIntent);
+             refreshList();
+         }
      }
 
     private View getViewByPosition(int pos, ListView listView) {
