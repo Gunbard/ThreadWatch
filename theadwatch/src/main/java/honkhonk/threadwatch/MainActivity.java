@@ -735,7 +735,8 @@ public class MainActivity extends AppCompatActivity
 
         final Resources resources = MainActivity.this.getResources();
         final Uri url = Uri.parse(threadUrl);
-        if (url.getAuthority() == null || !url.getAuthority().equals("boards.4chan.org")) {
+        if (url.getAuthority() == null || (!url.getAuthority().equals("boards.4chan.org")
+                && !url.getAuthority().equals("boards.4channel.org"))) {
             Toast.makeText(MainActivity.this,
                     resources.getString(R.string.invalid_thread_url),
                     Toast.LENGTH_SHORT).show();
