@@ -13,7 +13,7 @@ import android.net.NetworkInfo;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.NotificationCompat;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -51,6 +51,7 @@ public class FetcherService extends IntentService
         super(FetcherService.class.getSimpleName());
         LocalBroadcastManager.getInstance(this)
                 .registerReceiver(resetUpdatedThreadsReceiver, new IntentFilter("wtfistreds"));
+        Log.i(FetcherService.class.getSimpleName(), "Starting");
     }
 
     @Override
@@ -124,8 +125,6 @@ public class FetcherService extends IntentService
             return;
         }
 
-        String updatedThreadsText = "";
-
         for (final ThreadModel thread : threads) {
             if (thread.newReplyCount > 0 && !thread.disabled) {
                 Integer runningTotal = updatedThreads.get(thread);
@@ -143,9 +142,13 @@ public class FetcherService extends IntentService
         newDataIntent.putExtra("updatedthreads", updatedThreadsAsJson);
         LocalBroadcastManager.getInstance(this).sendBroadcast(newDataIntent);
 
+        StringBuilder updatedThreadsText = new StringBuilder();
+
         for (Map.Entry<ThreadModel, Integer> entry : updatedThreads.entrySet()) {
-            updatedThreadsText += entry.getKey().getTruncatedTitle() +
-                    " (+" + entry.getValue() + ")" + "\n";
+            updatedThreadsText.append(entry.getKey().getTruncatedTitle());
+            updatedThreadsText.append(" (+");
+            updatedThreadsText.append(entry.getValue());
+            updatedThreadsText.append(")\n");
         }
 
         Intent resultIntent = new Intent(this, MainActivity.class);
@@ -163,13 +166,12 @@ public class FetcherService extends IntentService
                 NotificationCompat.DEFAULT_LIGHTS | NotificationCompat.DEFAULT_SOUND;
 
         NotificationCompat.Builder builder =
-                (android.support.v7.app.NotificationCompat.Builder)
                         new NotificationCompat.Builder(this)
                                 .setSmallIcon(R.mipmap.ic_launcher)
-                                .setStyle(new NotificationCompat.BigTextStyle().bigText(updatedThreadsText))
+                                .setStyle(new NotificationCompat.BigTextStyle().bigText(updatedThreadsText.toString()))
                                 .setContentTitle("New replies!")
                                 .setContentText("New posts in " +
-                                        Integer.toString(updatedThreads.size()) + " thread(s).")
+                                        updatedThreads.size() + " thread(s).")
                                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                                 .setDefaults(defaults)
                                 .setContentIntent(resultPendingIntent);

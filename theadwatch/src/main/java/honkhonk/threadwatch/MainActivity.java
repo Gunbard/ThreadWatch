@@ -58,6 +58,7 @@ import java.util.Calendar;
 import honkhonk.threadwatch.adapters.ThreadListAdapter;
 import honkhonk.threadwatch.helpers.Common;
 import honkhonk.threadwatch.helpers.ThreadSorter;
+import honkhonk.threadwatch.jobs.FetcherJobService;
 import honkhonk.threadwatch.models.ThreadModel;
 import honkhonk.threadwatch.receivers.UpdatedDataReceiver;
 import honkhonk.threadwatch.retrievers.ThreadsRetriever;
@@ -100,14 +101,14 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        LocalBroadcastManager.getInstance(this)
-                .registerReceiver(updatedThreadsReceiver, new IntentFilter("wtfisthis"));
+//        LocalBroadcastManager.getInstance(this)
+//                .registerReceiver(updatedThreadsReceiver, new IntentFilter("wtfisthis"));
 
         fadeDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
-        listView = (ListView) findViewById(R.id.mainList);
-        fadeView = (ImageView) findViewById(R.id.fadeView);
-        previewWebView = (WebView) findViewById(R.id.previewWebView);
-        noThreadsText = (TextView) findViewById(R.id.noThreadsText);
+        listView = findViewById(R.id.mainList);
+        fadeView = findViewById(R.id.fadeView);
+        previewWebView = findViewById(R.id.previewWebView);
+        noThreadsText = findViewById(R.id.noThreadsText);
 
         final Vibrator vibrator = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
         canVibrate = vibrator.hasVibrator();
@@ -117,7 +118,7 @@ public class MainActivity extends AppCompatActivity
             public void onPageFinished(WebView view, String url) {
                 //view.scrollTo(0, view.getContentHeight());
                 //view.pageDown(true);
-                ProgressBar spinner = (ProgressBar) view.findViewById(R.id.previewSpinner);
+                ProgressBar spinner = view.findViewById(R.id.previewSpinner);
                 spinner.setVisibility(ProgressBar.GONE);
             }
         });
@@ -130,31 +131,31 @@ public class MainActivity extends AppCompatActivity
                 R.layout.thread_item, R.id.threadTitle, listDataSource);
         listView.setAdapter(listAdapter);
 
-        final AdapterView.OnItemClickListener mMessageClickedHandler =
+        final AdapterView.OnItemClickListener messageClickedHandler =
                 new AdapterView.OnItemClickListener() {
             public void onItemClick(final AdapterView parent,
                                     final View view,
                                     final int position,
                                     long id) {
                 final ThreadModel thread = listDataSource.get(position);
-                final String url = thread.getUrl() + "#p" + Long.toString(thread.lastPostId);
+                final String url = thread.getUrl() + "#p" + thread.lastPostId;
 
                 final Intent browserIntent =
                         new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                thread.replyCountDelta = 0;
+                //thread.replyCountDelta = 0;
                 listAdapter.notifyDataSetChanged();
-                saveData();
+                //saveData();
                 //scheduleAlarm();
                 startActivity(browserIntent);
             }
         };
 
-        listView.setOnItemClickListener(mMessageClickedHandler);
+        listView.setOnItemClickListener(messageClickedHandler);
 
         // Show the thread action menu on long click
         registerForContextMenu(listView);
 
-        swipeContainer = (SwipeRefreshLayout) findViewById(R.id.swipeContainer);
+        swipeContainer = findViewById(R.id.swipeContainer);
 
         // Setup refresh listener which triggers new data loading
         swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -169,13 +170,13 @@ public class MainActivity extends AppCompatActivity
 
         updateNoThreadsText();
         refresh();
-        scheduleAlarm();
+        //scheduleAlarm();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        saveData();
+        //saveData();
     }
 
     @Override
@@ -208,7 +209,7 @@ public class MainActivity extends AppCompatActivity
             }
 
             vibrateNotify = appSettings.getBoolean("pref_notify_vibrate", true);
-            saveData();
+            //saveData();
             //scheduleAlarm();
         }
     }
@@ -242,7 +243,7 @@ public class MainActivity extends AppCompatActivity
                 return true;*/
             case R.id.menu_notify:
                 setNotificationEnabledState(!notificationsEnabled);
-                saveData();
+                //saveData();
                 return true;
             case R.id.menu_add:
                 showAddThreadDialog();
@@ -261,28 +262,28 @@ public class MainActivity extends AppCompatActivity
         }
     }
     
-    public void scheduleAlarm() {
-        AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-
-        if (notificationIntent != null) {
-            alarm.cancel(notificationIntent);
-        }
-
-        Intent intent = new Intent(getApplicationContext(), FetcherService.class);
-
-        //final String listDataAsJson = (new Gson()).toJson(listDataSource);
-        //intent.putExtra(Common.SAVED_THREAD_DATA, listDataAsJson);
-
-        // Create a PendingIntent to be triggered when the alarm goes off
-        notificationIntent =
-                PendingIntent.getService(this, Common.ALARM_ID,
-                        intent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        alarm.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                Common.ONE_MINUTE_IN_MILLIS * refreshRate,
-                Common.ONE_MINUTE_IN_MILLIS * refreshRate,
-                notificationIntent);
-    }
+//    public void scheduleAlarm() {
+//        AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+//
+//        if (notificationIntent != null) {
+//            alarm.cancel(notificationIntent);
+//        }
+//
+//        Intent intent = new Intent(getApplicationContext(), FetcherService.class);
+//
+//        //final String listDataAsJson = (new Gson()).toJson(listDataSource);
+//        //intent.putExtra(Common.SAVED_THREAD_DATA, listDataAsJson);
+//
+//        // Create a PendingIntent to be triggered when the alarm goes off
+//        notificationIntent =
+//                PendingIntent.getService(this, Common.ALARM_ID,
+//                        intent, PendingIntent.FLAG_UPDATE_CURRENT);
+//
+//        alarm.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+//                Common.ONE_MINUTE_IN_MILLIS * refreshRate,
+//                Common.ONE_MINUTE_IN_MILLIS * refreshRate,
+//                notificationIntent);
+//    }
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v,
@@ -329,12 +330,12 @@ public class MainActivity extends AppCompatActivity
                 return true;
             case R.id.thread_menu_notify_toggle:
                 thread.disabled = !thread.disabled;
-                saveData();
+                //saveData();
                 refreshList();
                 return true;
             case R.id.thread_menu_mark_read:
                 thread.replyCountDelta = 0;
-                saveData();
+                //saveData();
                 refreshList();
                 return true;
             case R.id.thread_menu_delete:
@@ -517,9 +518,10 @@ public class MainActivity extends AppCompatActivity
 
         listView.animate().alpha(0.5f).setDuration(fadeDuration);
 
-        ThreadsRetriever threadsRetriever = new ThreadsRetriever();
-        threadsRetriever.addListener(this);
-        threadsRetriever.retrieveThreadData(this, listDataSource);
+//        ThreadsRetriever threadsRetriever = new ThreadsRetriever();
+//        threadsRetriever.addListener(this);
+//        threadsRetriever.retrieveThreadData(this, listDataSource);
+        FetcherJobService.scheduleFetcherJobServiceNow(this);
     }
 
     private void showAddThreadDialog() {
@@ -529,10 +531,10 @@ public class MainActivity extends AppCompatActivity
         final EditText input = new EditText(this);
         input.setHint(R.string.add_thread_dialog_input_hint);
 
-        final int viewPadding =
+        //final int viewPadding =
                 getResources().getDimensionPixelSize(R.dimen.add_thread_input_padding);
 
-        builder.setView(input, viewPadding, 0, viewPadding, 0);
+        builder.setView(input);
 
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override
@@ -623,7 +625,7 @@ public class MainActivity extends AppCompatActivity
 
         }, anim.getDuration());
 
-        saveData();
+        //saveData();
         refreshList();
     }
 
@@ -704,19 +706,19 @@ public class MainActivity extends AppCompatActivity
 
         return -1;
     }
-
-    private void saveData() {
-        final String listDataAsJson = (new Gson()).toJson(listDataSource);
-        Log.i(TAG, "List data: " + listDataAsJson);
-
-        SharedPreferences settings = getSharedPreferences(Common.PREFS_NAME, 0);
-        SharedPreferences.Editor editor = settings.edit();
-        editor.putString(Common.SAVED_THREAD_DATA, listDataAsJson);
-        editor.putInt(Common.SAVED_SORT_MODE, sortMode);
-        editor.putBoolean(Common.SAVED_SORT_ASCENDING, sortAscending);
-        editor.putBoolean(Common.SAVED_NOTIFY_ENABLED, notificationsEnabled);
-        editor.apply();
-    }
+// MainActivity should NOT be writing data to the data source
+//    private void saveData() {
+//        final String listDataAsJson = (new Gson()).toJson(listDataSource);
+//        Log.i(TAG, "List data: " + listDataAsJson);
+//
+//        SharedPreferences settings = getSharedPreferences(Common.PREFS_NAME, 0);
+//        SharedPreferences.Editor editor = settings.edit();
+//        editor.putString(Common.SAVED_THREAD_DATA, listDataAsJson);
+//        editor.putInt(Common.SAVED_SORT_MODE, sortMode);
+//        editor.putBoolean(Common.SAVED_SORT_ASCENDING, sortAscending);
+//        editor.putBoolean(Common.SAVED_NOTIFY_ENABLED, notificationsEnabled);
+//        editor.apply();
+//    }
 
     private boolean restoreData() {
         final SharedPreferences savedPrefs = getSharedPreferences(Common.PREFS_NAME, 0);
@@ -810,7 +812,7 @@ public class MainActivity extends AppCompatActivity
         Toast.makeText(MainActivity.this, "Added " + url,
                 Toast.LENGTH_SHORT).show();
 
-        saveData();
+        //saveData();
         refresh();
         //scheduleAlarm();
     }
