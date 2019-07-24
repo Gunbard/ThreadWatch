@@ -1,6 +1,5 @@
 package honkhonk.threadwatch;
 
-import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -61,10 +60,10 @@ import honkhonk.threadwatch.helpers.ThreadSorter;
 import honkhonk.threadwatch.jobs.FetcherJobService;
 import honkhonk.threadwatch.models.ThreadModel;
 import honkhonk.threadwatch.receivers.UpdatedDataReceiver;
-import honkhonk.threadwatch.retrievers.ThreadsRetriever;
 
 public class MainActivity extends AppCompatActivity
-        implements ThreadsRetriever.ThreadRetrieverListener,
+        implements
+        //ThreadsRetriever.ThreadRetrieverListener,
         ThreadListAdapter.ThreadListAdapterListener,
         UpdatedDataReceiver.UpdatedDataReceiverListener {
     final public static String TAG = MainActivity.class.getSimpleName();
@@ -73,6 +72,11 @@ public class MainActivity extends AppCompatActivity
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d(TAG, "Threads were updated!");
+            //boolean fetchSucceeded = intent.getBooleanExtra(Common.FETCH_JOB_SUCCEEDED_KEY, false);
+
+            swipeContainer.setRefreshing(false);
+            listView.animate().alpha(1.0f).setDuration(fadeDuration);
+            listView.setEnabled(true);
             refreshList();
         }
     };
@@ -104,6 +108,10 @@ public class MainActivity extends AppCompatActivity
 //        LocalBroadcastManager.getInstance(this)
 //                .registerReceiver(updatedThreadsReceiver, new IntentFilter("wtfisthis"));
 
+        LocalBroadcastManager.getInstance(this)
+                .registerReceiver(updatedThreadsReceiver,
+                        new IntentFilter(Common.FETCH_JOB_BROADCAST_KEY));
+
         fadeDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
         listView = findViewById(R.id.mainList);
         fadeView = findViewById(R.id.fadeView);
@@ -123,9 +131,9 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        if (!restoreData()) {
-            Log.i(TAG, "No previously saved threads found");
-        }
+//        if (!restoreData()) {
+//            Log.i(TAG, "No previously saved threads found");
+//        }
 
         listAdapter = new ThreadListAdapter(this,
                 R.layout.thread_item, R.id.threadTitle, listDataSource);
@@ -169,7 +177,7 @@ public class MainActivity extends AppCompatActivity
         swipeContainer.setColorSchemeResources(android.R.color.holo_green_dark);
 
         updateNoThreadsText();
-        refresh();
+        //refresh();
         //scheduleAlarm();
     }
 
@@ -349,19 +357,19 @@ public class MainActivity extends AppCompatActivity
     /**
      * ThreadRetrieverListener
      */
-    public void threadsRetrieved(final ArrayList<ThreadModel> threads) {
-        updateList(threads);
-        swipeContainer.setRefreshing(false);
-        listView.animate().alpha(1.0f).setDuration(fadeDuration);
-        listView.setEnabled(true);
-    }
-
-    public void threadRetrievalFailed(final ArrayList<ThreadModel> threads) {
-        updateList(threads);
-        swipeContainer.setRefreshing(false);
-        listView.animate().alpha(1.0f).setDuration(fadeDuration);
-        listView.setEnabled(true);
-    }
+//    public void threadsRetrieved(final ArrayList<ThreadModel> threads) {
+//        updateList(threads);
+//        swipeContainer.setRefreshing(false);
+//        listView.animate().alpha(1.0f).setDuration(fadeDuration);
+//        listView.setEnabled(true);
+//    }
+//
+//    public void threadRetrievalFailed(final ArrayList<ThreadModel> threads) {
+//        updateList(threads);
+//        swipeContainer.setRefreshing(false);
+//        listView.animate().alpha(1.0f).setDuration(fadeDuration);
+//        listView.setEnabled(true);
+//    }
 
     /**
      * ThreadListAdapterListener
@@ -515,13 +523,12 @@ public class MainActivity extends AppCompatActivity
 
         listView.setEnabled(false);
         swipeContainer.setRefreshing(true);
-
         listView.animate().alpha(0.5f).setDuration(fadeDuration);
 
 //        ThreadsRetriever threadsRetriever = new ThreadsRetriever();
 //        threadsRetriever.addListener(this);
 //        threadsRetriever.retrieveThreadData(this, listDataSource);
-        FetcherJobService.scheduleFetcherJobServiceNow(this);
+        FetcherJobService.scheduleFetcherJobService(this, true);
     }
 
     private void showAddThreadDialog() {
@@ -740,20 +747,14 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void refreshList() {
-        final SharedPreferences savedPrefs = getSharedPreferences(Common.PREFS_NAME, 0);
-        final String listDataAsJson = savedPrefs.getString(Common.SAVED_THREAD_DATA, null);
-
-        if (listDataAsJson == null) {
-            return;
-        }
-
-        listDataSource = (new Gson()).fromJson(listDataAsJson,
-                new TypeToken<ArrayList<ThreadModel>>() {}.getType());
+        listDataSource.clear();
+        listDataSource.addAll(ThreadDataManager.getThreadList(this));
 
         // Sort threads
         ThreadSorter.sort(listDataSource, Common.sortOptionsValues[sortMode], sortAscending);
 
         listAdapter.notifyDataSetChanged();
+        updateNoThreadsText();
     }
 
     private void addThread(final String threadUrl) {
@@ -790,12 +791,12 @@ public class MainActivity extends AppCompatActivity
             return;
         }
 
-        final int dupeThreadIndex = getThreadIndex(board, id);
-        if (dupeThreadIndex >= 0) {
+        final ThreadModel dupeThread = ThreadDataManager.getThread(this, board, id);
+        if (dupeThread != null) {
             Toast.makeText(MainActivity.this,
                     resources.getString(R.string.duplicate_thread),
                     Toast.LENGTH_SHORT).show();
-            highlightListItem(dupeThreadIndex, fadeDuration * 4);
+            //highlightListItem(dupeThreadIndex, fadeDuration * 4);
             return;
         }
 
@@ -805,16 +806,15 @@ public class MainActivity extends AppCompatActivity
         newThread.dateAdded = Calendar.getInstance();
         newThread.firstRefresh = true;
 
-        listDataSource.add(newThread);
-        listAdapter.notifyDataSetChanged();
-        updateNoThreadsText();
+        //listDataSource.add(newThread);
+        //listAdapter.notifyDataSetChanged();
+
+        ThreadDataManager.addThread(this, newThread);
 
         Toast.makeText(MainActivity.this, "Added " + url,
                 Toast.LENGTH_SHORT).show();
 
-        //saveData();
         refresh();
-        //scheduleAlarm();
     }
 
      private void handleIntent(final Intent intent) {
@@ -830,16 +830,15 @@ public class MainActivity extends AppCompatActivity
              }
 
              addThread(threadUrl);
-             return;
          }
 
-         final Bundle extras = intent.getExtras();
-         if (extras != null && extras.getString("cheese") != null &&
-                 extras.getString("cheese").equals("yes")) {
-             Intent newIntent = new Intent("wtfistreds");
-             LocalBroadcastManager.getInstance(this).sendBroadcast(newIntent);
-             refreshList();
-         }
+//         final Bundle extras = intent.getExtras();
+//         if (extras != null && extras.getString("cheese") != null &&
+//                 extras.getString("cheese").equals("yes")) {
+//             Intent newIntent = new Intent("wtfistreds");
+//             LocalBroadcastManager.getInstance(this).sendBroadcast(newIntent);
+//             //refreshList();
+//         }
      }
 
     private View getViewByPosition(int pos, ListView listView) {

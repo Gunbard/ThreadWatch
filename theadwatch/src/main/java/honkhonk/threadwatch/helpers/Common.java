@@ -43,4 +43,8 @@ final public class Common {
 
     // Default 5 minute refresh rate
     final public static int DEFAULT_REFRESH_TIMEOUT = 5;
+
+    final public static String FETCH_JOB_BROADCAST_KEY = "TWFetchJobBroadcastKey";
+    final public static String FETCH_JOB_SUCCEEDED_KEY = "TWFetchJobSucceededKey";
+
 }
