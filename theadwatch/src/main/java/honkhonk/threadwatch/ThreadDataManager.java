@@ -43,6 +43,20 @@ public class ThreadDataManager {
         editor.apply();
     }
 
+    public static void deleteThread(Context context, String board, String id) {
+        final ArrayList<ThreadModel> threadList = getThreadList(context);
+        if (threadList == null) {
+            return;
+        }
+
+        for (final ThreadModel thread : threadList) {
+            if (thread.board.equals(board) && thread.id.equals(id)) {
+                threadList.remove(thread);
+                updateThreadList(context, threadList);
+            }
+        }
+    }
+
     public static void updateThreadList(Context context, ArrayList<ThreadModel> newThreadList) {
         final String listDataAsJson = (new Gson()).toJson(newThreadList);
         Log.d(TAG, "List data: " + listDataAsJson);

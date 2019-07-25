@@ -7,10 +7,10 @@ import android.app.job.JobService;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-
-import com.google.gson.Gson;
 
 import java.util.ArrayList;
 
@@ -34,8 +34,16 @@ public class FetcherJobService extends JobService implements ThreadsRetriever.Th
             builder.setMinimumLatency(1); // Don't wait
             builder.setOverrideDeadline(1); // Perform immediately
         } else {
-            builder.setMinimumLatency(30 * 1000); // Wait at least 30s
-            builder.setOverrideDeadline(5 * 60 * 1000); // maximum delay of 5 minutes
+            final SharedPreferences appSettings =
+                    PreferenceManager.getDefaultSharedPreferences(context);
+
+            final String refreshValue = appSettings.getString("pref_refresh_rate", "5");
+            int refreshRate = 5;
+            if (refreshValue.length() > 0) {
+                refreshRate = Integer.parseInt(refreshValue);
+            }
+            builder.setMinimumLatency(Common.ONE_MINUTE_IN_MILLIS * refreshRate); // Minimum wait delay
+            builder.setOverrideDeadline((Common.ONE_MINUTE_IN_MILLIS * refreshRate) + 30000); // Maximum delay
         }
 
         builder.setRequiresCharging(false); // we don't care if the device is charging or not
@@ -61,8 +69,6 @@ public class FetcherJobService extends JobService implements ThreadsRetriever.Th
 
     @Override
     public boolean onStartJob(JobParameters params) {
-//        Intent service = new Intent(getApplicationContext(), FetcherService.class);
-//        getApplicationContext().startService(service);
         Log.i(TAG, "Started to fetch threads");
         refreshThreadData();
         //scheduleFetcherJobService(getApplicationContext(), false); // reschedule the job
