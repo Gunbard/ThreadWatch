@@ -55,6 +55,8 @@ import honkhonk.threadwatch.adapters.ThreadListAdapter;
 import honkhonk.threadwatch.helpers.Common;
 import honkhonk.threadwatch.helpers.ThreadSorter;
 import honkhonk.threadwatch.jobs.FetcherJobService;
+import honkhonk.threadwatch.managers.PreferencesDataManager;
+import honkhonk.threadwatch.managers.ThreadDataManager;
 import honkhonk.threadwatch.models.ThreadModel;
 import honkhonk.threadwatch.receivers.UpdatedDataReceiver;
 
@@ -141,10 +143,9 @@ public class MainActivity extends AppCompatActivity
 
                 final Intent browserIntent =
                         new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                //thread.replyCountDelta = 0;
+                thread.replyCountDelta = 0;
+                ThreadDataManager.updateThread(MainActivity.this, thread);
                 listAdapter.notifyDataSetChanged();
-                //saveData();
-                //scheduleAlarm();
                 startActivity(browserIntent);
             }
         };
@@ -206,8 +207,6 @@ public class MainActivity extends AppCompatActivity
             }
 
             vibrateNotify = appSettings.getBoolean("pref_notify_vibrate", true);
-            //saveData();
-            //scheduleAlarm();
         }
     }
 
@@ -240,7 +239,6 @@ public class MainActivity extends AppCompatActivity
                 return true;*/
             case R.id.menu_notify:
                 setNotificationEnabledState(!notificationsEnabled);
-                //saveData();
                 return true;
             case R.id.menu_add:
                 showAddThreadDialog();
@@ -291,7 +289,6 @@ public class MainActivity extends AppCompatActivity
         deleteButton.setTitle(s);
     }
 
-
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         final AdapterView.AdapterContextMenuInfo info =
@@ -304,12 +301,12 @@ public class MainActivity extends AppCompatActivity
                 return true;
             case R.id.thread_menu_notify_toggle:
                 thread.disabled = !thread.disabled;
-                //saveData();
+                ThreadDataManager.updateThread(MainActivity.this, thread);
                 refreshList();
                 return true;
             case R.id.thread_menu_mark_read:
                 thread.replyCountDelta = 0;
-                //saveData();
+                ThreadDataManager.updateThread(MainActivity.this, thread);
                 refreshList();
                 return true;
             case R.id.thread_menu_delete:
@@ -576,7 +573,6 @@ public class MainActivity extends AppCompatActivity
 
         }, anim.getDuration());
 
-        //saveData();
         refreshList();
     }
 

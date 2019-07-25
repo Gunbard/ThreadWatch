@@ -1,4 +1,4 @@
-package honkhonk.threadwatch;
+package honkhonk.threadwatch.managers;
 
 import android.content.Context;
 import android.content.SharedPreferences;

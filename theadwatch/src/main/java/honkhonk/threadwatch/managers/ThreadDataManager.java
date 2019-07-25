@@ -1,4 +1,4 @@
-package honkhonk.threadwatch;
+package honkhonk.threadwatch.managers;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -46,6 +46,7 @@ public class ThreadDataManager {
     public static void deleteThread(Context context, String board, String id) {
         final ArrayList<ThreadModel> threadList = getThreadList(context);
         if (threadList == null) {
+            Log.e(TAG, "Tried to delete thread in an empty list");
             return;
         }
 
@@ -53,8 +54,31 @@ public class ThreadDataManager {
             if (thread.board.equals(board) && thread.id.equals(id)) {
                 threadList.remove(thread);
                 updateThreadList(context, threadList);
+                return;
             }
         }
+
+        Log.e(TAG, "Could not find thread to delete");
+    }
+
+    public static boolean updateThread(Context context, ThreadModel updatedThread) {
+        final ArrayList<ThreadModel> threadList = getThreadList(context);
+        if (threadList == null) {
+            Log.e(TAG, "Tried to update thread in an empty list");
+            return false;
+        }
+
+        for (final ThreadModel thread : threadList) {
+            if (updatedThread.board.equals(thread.board) && updatedThread.id.equals(thread.id)) {
+                threadList.remove(thread);
+                threadList.add(updatedThread);
+                updateThreadList(context, threadList);
+                return true;
+            }
+        }
+
+        Log.e(TAG, "Could not find thread to update");
+        return false;
     }
 
     public static void updateThreadList(Context context, ArrayList<ThreadModel> newThreadList) {

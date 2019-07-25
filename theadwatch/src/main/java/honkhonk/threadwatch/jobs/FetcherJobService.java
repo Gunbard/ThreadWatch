@@ -14,7 +14,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 
-import honkhonk.threadwatch.ThreadDataManager;
+import honkhonk.threadwatch.managers.ThreadDataManager;
 import honkhonk.threadwatch.helpers.Common;
 import honkhonk.threadwatch.models.ThreadModel;
 import honkhonk.threadwatch.retrievers.ThreadsRetriever;
