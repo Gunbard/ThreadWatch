@@ -101,6 +101,10 @@ public class FetcherJobService extends JobService implements ThreadsRetriever.Th
             }
         }
 
+        Intent newDataIntent = new Intent(Common.FETCH_JOB_BROADCAST_KEY);
+        newDataIntent.putExtra(Common.FETCH_JOB_SUCCEEDED_KEY, true);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(newDataIntent);
+
         if (!threadWasUpdated || !PreferencesDataManager.notificationsEnabled(this)) {
             return;
         }
@@ -109,20 +113,15 @@ public class FetcherJobService extends JobService implements ThreadsRetriever.Th
         boolean canVibrate = vibrator.hasVibrator();
 
 
-        //blah
-
-        Intent newDataIntent = new Intent(Common.FETCH_JOB_BROADCAST_KEY);
-        newDataIntent.putExtra(Common.FETCH_JOB_SUCCEEDED_KEY, true);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(newDataIntent);
+        //blah notification crap
 
     }
     @Override
     public void threadRetrievalFailed(final ArrayList<ThreadModel> threads) {
-        Log.d(TAG, "Couldn't get thread data");
-
-        Intent newDataIntent = new Intent(Common.FETCH_JOB_BROADCAST_KEY);
-        newDataIntent.putExtra(Common.FETCH_JOB_SUCCEEDED_KEY, false);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(newDataIntent);
+        threadsRetrieved(threads);
+//        Intent newDataIntent = new Intent(Common.FETCH_JOB_BROADCAST_KEY);
+//        newDataIntent.putExtra(Common.FETCH_JOB_SUCCEEDED_KEY, false);
+//        LocalBroadcastManager.getInstance(this).sendBroadcast(newDataIntent);
     }
 
     // Private methods

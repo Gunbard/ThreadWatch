@@ -168,7 +168,7 @@ public class MainActivity extends AppCompatActivity
         // Configure the refreshing colors
         swipeContainer.setColorSchemeResources(android.R.color.holo_green_dark);
 
-        updateNoThreadsText();
+        refreshList();
     }
 
     @Override
