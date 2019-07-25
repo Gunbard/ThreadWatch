@@ -8,20 +8,25 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
-import honkhonk.threadwatch.managers.ThreadDataManager;
 import honkhonk.threadwatch.helpers.Common;
+import honkhonk.threadwatch.managers.PreferencesDataManager;
+import honkhonk.threadwatch.managers.ThreadDataManager;
 import honkhonk.threadwatch.models.ThreadModel;
 import honkhonk.threadwatch.retrievers.ThreadsRetriever;
 
 public class FetcherJobService extends JobService implements ThreadsRetriever.ThreadRetrieverListener {
     final public static String TAG = FetcherJobService.class.getSimpleName();
     final public static int FETCHER_JOB_ID = 0;
+
+    private HashMap<ThreadModel, Integer> updatedThreads = new HashMap<>();
 
     public static void scheduleFetcherJobService(Context context, boolean noWait) {
         JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
@@ -87,6 +92,24 @@ public class FetcherJobService extends JobService implements ThreadsRetriever.Th
     public void threadsRetrieved(final ArrayList<ThreadModel> threads) {
         Log.d(TAG, "Got thread data");
         ThreadDataManager.updateThreadList(this, threads);
+
+        boolean threadWasUpdated = false;
+        for (final ThreadModel thread : threads) {
+            if (thread.newReplyCount > 0 && !thread.disabled) {
+                threadWasUpdated = true;
+                break;
+            }
+        }
+
+        if (!threadWasUpdated || !PreferencesDataManager.notificationsEnabled(this)) {
+            return;
+        }
+
+        final Vibrator vibrator = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
+        boolean canVibrate = vibrator.hasVibrator();
+
+
+        //blah
 
         Intent newDataIntent = new Intent(Common.FETCH_JOB_BROADCAST_KEY);
         newDataIntent.putExtra(Common.FETCH_JOB_SUCCEEDED_KEY, true);
