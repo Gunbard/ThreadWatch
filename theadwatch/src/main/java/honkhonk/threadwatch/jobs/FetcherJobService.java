@@ -15,13 +15,8 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-
-import com.google.gson.Gson;
-
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
-
 import honkhonk.threadwatch.MainActivity;
 import honkhonk.threadwatch.R;
 import honkhonk.threadwatch.helpers.Common;
@@ -53,6 +48,11 @@ public class FetcherJobService extends JobService implements ThreadsRetriever.Th
             if (refreshValue.length() > 0) {
                 refreshRate = Integer.parseInt(refreshValue);
             }
+
+            if (refreshRate < 1) {
+                return;
+            }
+
             builder.setMinimumLatency(Common.ONE_MINUTE_IN_MILLIS * refreshRate); // Minimum wait delay
             builder.setOverrideDeadline((Common.ONE_MINUTE_IN_MILLIS * refreshRate) + 30000); // Maximum delay
         }
@@ -61,7 +61,7 @@ public class FetcherJobService extends JobService implements ThreadsRetriever.Th
         jobScheduler.schedule(builder.build());
     }
 
-    public static Boolean fetcherIsRunning(Context context) {
+    public static Boolean fetcherIsScheduled(Context context) {
         JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
         for ( JobInfo jobInfo : jobScheduler.getAllPendingJobs() ) {
             if ( jobInfo.getId() == FETCHER_JOB_ID ) {

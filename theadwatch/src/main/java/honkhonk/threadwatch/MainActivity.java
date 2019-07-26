@@ -2,7 +2,7 @@ package honkhonk.threadwatch;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
+import android.app.job.JobInfo;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -53,6 +53,7 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 import honkhonk.threadwatch.adapters.ThreadListAdapter;
 import honkhonk.threadwatch.helpers.Common;
@@ -83,7 +84,6 @@ public class MainActivity extends AppCompatActivity
     private SwipeRefreshLayout swipeContainer;
     private ArrayList<ThreadModel> listDataSource = new ArrayList<>();
     private ArrayAdapter<ThreadModel> listAdapter;
-    private PendingIntent notificationIntent;
     private Menu mainMenu;
 
     private ListView listView;
@@ -172,6 +172,10 @@ public class MainActivity extends AppCompatActivity
         swipeContainer.setColorSchemeResources(android.R.color.holo_green_dark);
 
         refreshList();
+
+        if (!FetcherJobService.fetcherIsScheduled(this)) {
+            FetcherJobService.scheduleFetcherJobService(this, false);
+        }
     }
 
     @Override
@@ -218,7 +222,11 @@ public class MainActivity extends AppCompatActivity
 
             // Update job if refresh rate changed
             if (previousRefreshRate != refreshRate) {
-                FetcherJobService.scheduleFetcherJobService(this, false);
+                if (refreshRate > 0) {
+                    FetcherJobService.scheduleFetcherJobService(this, false);
+                } else {
+                    FetcherJobService.stopFetcher(this);
+                }
             }
         }
     }
