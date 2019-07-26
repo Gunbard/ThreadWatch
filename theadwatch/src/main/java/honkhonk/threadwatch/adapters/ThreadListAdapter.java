@@ -62,10 +62,10 @@ public class ThreadListAdapter extends ArrayAdapter<ThreadModel> {
 
         final ThreadModel thread = threads.get(position);
 
-        final TextView boardName = (TextView) view.findViewById(R.id.boardTitle);
+        final TextView boardName = view.findViewById(R.id.boardTitle);
         boardName.setText("/" + thread.board + "/");
 
-        final TextView title = (TextView) view.findViewById(R.id.threadTitle);
+        final TextView title = view.findViewById(R.id.threadTitle);
         final String titleText = thread.getTitle();
 
         if (titleText != null && !titleText.equals("") && !thread.firstRefresh) {
@@ -74,7 +74,7 @@ public class ThreadListAdapter extends ArrayAdapter<ThreadModel> {
             title.setText(((Context) context).getResources().getString(R.string.no_thread_data));
         }
 
-        final TextView newPosts = (TextView) view.findViewById(R.id.newPosts);
+        final TextView newPosts = view.findViewById(R.id.newPosts);
         if (thread.replyCountDelta != 0) {
             newPosts.setText("(" + thread.replyCountDelta + ")") ;
         } else {

@@ -142,6 +142,10 @@ public class FetcherJobService extends JobService implements ThreadsRetriever.Th
         // Save for persistence
         ThreadDataManager.setUpdatedThreads(this, updatedThreads);
 
+        if (updatedThreads.size() == 0) {
+            return;
+        }
+
         Intent resultIntent = new Intent(this, MainActivity.class);
         PendingIntent resultPendingIntent =
                 PendingIntent.getActivity(
@@ -179,7 +183,6 @@ public class FetcherJobService extends JobService implements ThreadsRetriever.Th
         // Builds the notification and issues it.
         builder.setAutoCancel(true);
         notificationManager.notify(Common.NOTIFICATION_ID, builder.build());
-
     }
     @Override
     public void threadRetrievalFailed(final ArrayList<ThreadModel> threads) {

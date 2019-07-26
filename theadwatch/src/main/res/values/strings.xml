@@ -64,6 +64,8 @@
     <string name="pref_category_notifications">Notifications</string>
     <string name="pref_notify_vibrate">Vibrate</string>
     <string name="pref_notify_vibrate_disabled">Your device cannot vibrate!</string>
+    <string name="pref_notify_vibrate_sysmanaged">Manage notification vibration in the Android notification settings!</string>
+
 
     <string name="notification_channel_name_updated_thread">Thread Updated</string>
     <string name="notification_channel_desc_updated_thread">New posts in a thread</string>

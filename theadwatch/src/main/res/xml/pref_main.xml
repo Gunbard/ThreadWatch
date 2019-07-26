@@ -33,11 +33,11 @@
             android:title="@string/pref_title_vibrate" />-->
     </PreferenceCategory>
 
-    <!--<PreferenceCategory android:title="@string/pref_category_notifications">-->
-        <!--<SwitchPreference-->
-            <!--android:checked="true"-->
-            <!--android:defaultValue="true"-->
-            <!--android:key="pref_notify_vibrate"-->
-            <!--android:title="@string/pref_notify_vibrate" />-->
-    <!--</PreferenceCategory>-->
+    <PreferenceCategory android:title="@string/pref_category_notifications">
+        <SwitchPreference
+            android:checked="true"
+            android:defaultValue="true"
+            android:key="pref_notify_vibrate"
+            android:title="@string/pref_notify_vibrate" />
+    </PreferenceCategory>
 </PreferenceScreen>

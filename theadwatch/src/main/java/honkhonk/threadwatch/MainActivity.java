@@ -347,9 +347,9 @@ public class MainActivity extends AppCompatActivity
 
         final ThreadModel thread = listDataSource.get(position);
         final long lastPostId = thread.lastPostId;
-        previewWebView.loadUrl(thread.getUrl() + "#p" + Long.toString(lastPostId));
+        previewWebView.loadUrl(thread.getUrl() + "#p" + lastPostId);
 
-        ProgressBar spinner = (ProgressBar) previewWebView.findViewById(R.id.previewSpinner);
+        ProgressBar spinner = previewWebView.findViewById(R.id.previewSpinner);
         spinner.setVisibility(ProgressBar.VISIBLE);
     }
 
@@ -424,10 +424,6 @@ public class MainActivity extends AppCompatActivity
 
         final EditText input = new EditText(this);
         input.setHint(R.string.add_thread_dialog_input_hint);
-
-        //final int viewPadding =
-                getResources().getDimensionPixelSize(R.dimen.add_thread_input_padding);
-
         builder.setView(input);
 
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
@@ -588,7 +584,7 @@ public class MainActivity extends AppCompatActivity
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             CharSequence name = getString(R.string.notification_channel_name_updated_thread);
             String description = getString(R.string.notification_channel_desc_updated_thread);
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            int importance = NotificationManager.IMPORTANCE_LOW;
             NotificationChannel channel = new NotificationChannel(Common.CHANNEL_ID, name, importance);
             channel.setDescription(description);
             // Register the channel with the system; you can't change the importance
