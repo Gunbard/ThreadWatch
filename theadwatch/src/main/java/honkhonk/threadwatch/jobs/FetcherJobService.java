@@ -96,6 +96,10 @@ public class FetcherJobService extends JobService implements ThreadsRetriever.Th
 
     @Override
     public void threadsRetrieved(final ArrayList<ThreadModel> threads) {
+        if (threads.size() == 0) {
+            return;
+        }
+
         Log.d(TAG, "Got thread data");
         ThreadDataManager.updateThreadList(this, threads);
         HashMap<String, Integer> updatedThreads = ThreadDataManager.getUpdatedThreads(this);
@@ -186,7 +190,7 @@ public class FetcherJobService extends JobService implements ThreadsRetriever.Th
     }
     @Override
     public void threadRetrievalFailed(final ArrayList<ThreadModel> threads) {
-        threadsRetrieved(threads);
+        threadsRetrieved(new ArrayList<ThreadModel>());
     }
 
     // Private methods
