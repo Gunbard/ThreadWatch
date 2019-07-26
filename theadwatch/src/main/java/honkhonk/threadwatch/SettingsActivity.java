@@ -134,7 +134,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             // guidelines.
             bindPreferenceSummaryToValue(findPreference("pref_refresh_rate"));
 
-            final Boolean canVibrate = getActivity()
+            final boolean canVibrate = getActivity()
                 .getIntent().getExtras().getBoolean(Common.PREFS_CAN_VIBRATE, true);
 
             final Preference vibratePref = findPreference("pref_notify_vibrate");

@@ -13,7 +13,7 @@ public class BootReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         final String action = intent.getAction();
         if (action != null && action.equals(Intent.ACTION_BOOT_COMPLETED)) {
-            //FetcherJobService.scheduleFetcherJobService(context);
+            FetcherJobService.scheduleFetcherJobService(context, false);
         }
     }
 }

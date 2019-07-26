@@ -1,4 +1,5 @@
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory
         android:title="@string/pref_category_refresh"
         android:key="pref_main_settings">
@@ -32,12 +33,11 @@
             android:title="@string/pref_title_vibrate" />-->
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:title="@string/pref_category_notifications">
-        <SwitchPreference
-            android:key="pref_notify_vibrate"
-            android:title="@string/pref_notify_vibrate"
-            android:checked="true"
-            android:defaultValue="true"/>
-    </PreferenceCategory>
+    <!--<PreferenceCategory android:title="@string/pref_category_notifications">-->
+        <!--<SwitchPreference-->
+            <!--android:checked="true"-->
+            <!--android:defaultValue="true"-->
+            <!--android:key="pref_notify_vibrate"-->
+            <!--android:title="@string/pref_notify_vibrate" />-->
+    <!--</PreferenceCategory>-->
 </PreferenceScreen>

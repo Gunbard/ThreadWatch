@@ -30,6 +30,7 @@ final public class Common {
     // Shared prefs keys
     final public static String PREFS_NAME = "ThreadWatcherSharedPrefs";
     final public static String SAVED_THREAD_DATA = "SavedThreadData";
+    final public static String SAVED_UPDATED_THREADS = "SavedUpdatedThreads";
     final public static String SAVED_SORT_MODE = "SavedSortMode";
     final public static String SAVED_SORT_ASCENDING = "SavedSortAscending";
     final public static String SAVED_NOTIFY_ENABLED = "NotificationsEnabled";
@@ -47,4 +48,5 @@ final public class Common {
     final public static String FETCH_JOB_BROADCAST_KEY = "TWFetchJobBroadcastKey";
     final public static String FETCH_JOB_SUCCEEDED_KEY = "TWFetchJobSucceededKey";
 
+    final public static String CHANNEL_ID = "TWNotificationChannel";
 }

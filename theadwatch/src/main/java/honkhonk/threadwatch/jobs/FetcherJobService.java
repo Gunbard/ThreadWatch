@@ -1,5 +1,7 @@
 package honkhonk.threadwatch.jobs;
 
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.job.JobInfo;
 import android.app.job.JobParameters;
 import android.app.job.JobScheduler;
@@ -10,12 +12,18 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.google.gson.Gson;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
+import honkhonk.threadwatch.MainActivity;
+import honkhonk.threadwatch.R;
 import honkhonk.threadwatch.helpers.Common;
 import honkhonk.threadwatch.managers.PreferencesDataManager;
 import honkhonk.threadwatch.managers.ThreadDataManager;
@@ -25,8 +33,6 @@ import honkhonk.threadwatch.retrievers.ThreadsRetriever;
 public class FetcherJobService extends JobService implements ThreadsRetriever.ThreadRetrieverListener {
     final public static String TAG = FetcherJobService.class.getSimpleName();
     final public static int FETCHER_JOB_ID = 0;
-
-    private HashMap<ThreadModel, Integer> updatedThreads = new HashMap<>();
 
     public static void scheduleFetcherJobService(Context context, boolean noWait) {
         JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
@@ -43,7 +49,7 @@ public class FetcherJobService extends JobService implements ThreadsRetriever.Th
                     PreferenceManager.getDefaultSharedPreferences(context);
 
             final String refreshValue = appSettings.getString("pref_refresh_rate", "5");
-            int refreshRate = 5;
+            int refreshRate = Common.DEFAULT_REFRESH_TIMEOUT;
             if (refreshValue.length() > 0) {
                 refreshRate = Integer.parseInt(refreshValue);
             }
@@ -76,7 +82,7 @@ public class FetcherJobService extends JobService implements ThreadsRetriever.Th
     public boolean onStartJob(JobParameters params) {
         Log.i(TAG, "Started to fetch threads");
         refreshThreadData();
-        //scheduleFetcherJobService(getApplicationContext(), false); // reschedule the job
+        scheduleFetcherJobService(getApplicationContext(), false); // reschedule the job
         return true;
     }
 
@@ -92,6 +98,7 @@ public class FetcherJobService extends JobService implements ThreadsRetriever.Th
     public void threadsRetrieved(final ArrayList<ThreadModel> threads) {
         Log.d(TAG, "Got thread data");
         ThreadDataManager.updateThreadList(this, threads);
+        HashMap<String, Integer> updatedThreads = ThreadDataManager.getUpdatedThreads(this);
 
         boolean threadWasUpdated = false;
         for (final ThreadModel thread : threads) {
@@ -101,9 +108,9 @@ public class FetcherJobService extends JobService implements ThreadsRetriever.Th
             }
         }
 
-        Intent newDataIntent = new Intent(Common.FETCH_JOB_BROADCAST_KEY);
-        newDataIntent.putExtra(Common.FETCH_JOB_SUCCEEDED_KEY, true);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(newDataIntent);
+        Intent fetchFinishedIntent = new Intent(Common.FETCH_JOB_BROADCAST_KEY);
+        fetchFinishedIntent.putExtra(Common.FETCH_JOB_SUCCEEDED_KEY, true);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(fetchFinishedIntent);
 
         if (!threadWasUpdated || !PreferencesDataManager.notificationsEnabled(this)) {
             return;
@@ -111,17 +118,72 @@ public class FetcherJobService extends JobService implements ThreadsRetriever.Th
 
         final Vibrator vibrator = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
         boolean canVibrate = vibrator.hasVibrator();
+        StringBuilder updatedThreadsText = new StringBuilder();
 
+        for (final ThreadModel thread : threads) {
+            if (thread.newReplyCount > 0 && !thread.disabled && thread.replyCountDelta > 0) {
+                updatedThreadsText.append(thread.getTruncatedTitle());
+                updatedThreadsText.append(" (+");
 
-        //blah notification crap
+                Integer runningTotal = updatedThreads.get(thread.board + thread.id);
+                if (runningTotal != null) {
+                    final Integer newTotal = runningTotal + thread.newReplyCount;
+                    updatedThreads.put(thread.board + thread.id, newTotal);
+                    updatedThreadsText.append(newTotal);
+                } else {
+                    updatedThreads.put(thread.board + thread.id, thread.newReplyCount);
+                    updatedThreadsText.append(thread.newReplyCount);
+                }
+
+                updatedThreadsText.append(")\n");
+            }
+        }
+
+        // Save for persistence
+        ThreadDataManager.setUpdatedThreads(this, updatedThreads);
+
+        Intent resultIntent = new Intent(this, MainActivity.class);
+        PendingIntent resultPendingIntent =
+                PendingIntent.getActivity(
+                        this,
+                        0,
+                        resultIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                );
+
+        final SharedPreferences appSettings = PreferenceManager.getDefaultSharedPreferences(this);
+        final boolean vibrateNotify = appSettings.getBoolean("pref_notify_vibrate", true);
+
+        final int defaults = (vibrateNotify && canVibrate) ? NotificationCompat.DEFAULT_ALL :
+                NotificationCompat.DEFAULT_LIGHTS | NotificationCompat.DEFAULT_SOUND;
+
+        NotificationCompat.Builder builder =
+                new NotificationCompat.Builder(this, Common.CHANNEL_ID)
+                        .setSmallIcon(R.mipmap.ic_launcher)
+                        .setStyle(new NotificationCompat.BigTextStyle().bigText(updatedThreadsText.toString()))
+                        .setContentTitle("New replies!")
+                        .setContentText("New posts in " +
+                                updatedThreads.size() + " thread(s).")
+                        .setPriority(NotificationCompat.PRIORITY_HIGH)
+                        .setDefaults(defaults)
+                        .setContentIntent(resultPendingIntent);
+
+        if (!vibrateNotify) {
+            // Workaround to prevent vibrate even when the device is in vibrate mode
+            builder.setVibrate(new long[]{0L});
+        }
+        // Gets an instance of the NotificationManager service
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
+        // Builds the notification and issues it.
+        builder.setAutoCancel(true);
+        notificationManager.notify(Common.NOTIFICATION_ID, builder.build());
 
     }
     @Override
     public void threadRetrievalFailed(final ArrayList<ThreadModel> threads) {
         threadsRetrieved(threads);
-//        Intent newDataIntent = new Intent(Common.FETCH_JOB_BROADCAST_KEY);
-//        newDataIntent.putExtra(Common.FETCH_JOB_SUCCEEDED_KEY, false);
-//        LocalBroadcastManager.getInstance(this).sendBroadcast(newDataIntent);
     }
 
     // Private methods

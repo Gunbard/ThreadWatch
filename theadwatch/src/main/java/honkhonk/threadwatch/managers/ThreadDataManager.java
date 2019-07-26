@@ -8,6 +8,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import honkhonk.threadwatch.helpers.Common;
 import honkhonk.threadwatch.models.ThreadModel;
@@ -105,5 +106,33 @@ public class ThreadDataManager {
         }
 
         return null;
+    }
+
+    public static HashMap<String, Integer> getUpdatedThreads(Context context) {
+        final SharedPreferences savedPrefs = context.getSharedPreferences(Common.PREFS_NAME, 0);
+        final String listDataAsJson = savedPrefs.getString(Common.SAVED_UPDATED_THREADS, null);
+        if (listDataAsJson == null) {
+            return new HashMap<>();
+        }
+
+        return (new Gson()).fromJson(listDataAsJson,
+                new TypeToken<HashMap<String, Integer>>() {}.getType());
+    }
+
+    public static void setUpdatedThreads(Context context,
+                                            HashMap<String, Integer> newUpdatedThreads) {
+        final String listDataAsJson = (new Gson()).toJson(newUpdatedThreads);
+
+        SharedPreferences settings = context.getSharedPreferences(Common.PREFS_NAME, 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString(Common.SAVED_UPDATED_THREADS, listDataAsJson);
+        editor.apply();
+    }
+
+    public static void clearUpdatedThreads(Context context) {
+        SharedPreferences settings = context.getSharedPreferences(Common.PREFS_NAME, 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString(Common.SAVED_UPDATED_THREADS, null);
+        editor.apply();
     }
 }

@@ -1,5 +1,7 @@
 package honkhonk.threadwatch;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -13,6 +15,7 @@ import android.graphics.Paint;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
@@ -58,12 +61,10 @@ import honkhonk.threadwatch.jobs.FetcherJobService;
 import honkhonk.threadwatch.managers.PreferencesDataManager;
 import honkhonk.threadwatch.managers.ThreadDataManager;
 import honkhonk.threadwatch.models.ThreadModel;
-import honkhonk.threadwatch.receivers.UpdatedDataReceiver;
 
 public class MainActivity extends AppCompatActivity
         implements
-        ThreadListAdapter.ThreadListAdapterListener,
-        UpdatedDataReceiver.UpdatedDataReceiverListener {
+        ThreadListAdapter.ThreadListAdapterListener {
     final public static String TAG = MainActivity.class.getSimpleName();
 
     final private BroadcastReceiver updatedThreadsReceiver = new BroadcastReceiver() {
@@ -102,6 +103,8 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        createNotificationChannel();
 
         LocalBroadcastManager.getInstance(this)
                 .registerReceiver(updatedThreadsReceiver,
@@ -184,6 +187,9 @@ public class MainActivity extends AppCompatActivity
         final Intent intent = getIntent();
         handleIntent(intent);
         intent.setData(null);
+
+        refreshList();
+        ThreadDataManager.clearUpdatedThreads(this);
     }
 
 
@@ -197,6 +203,8 @@ public class MainActivity extends AppCompatActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == Common.SETTINGS_CLOSED_ID) {
+            final int previousRefreshRate = refreshRate;
+
             // Update refresh rate
             final SharedPreferences appSettings =
                     PreferenceManager.getDefaultSharedPreferences(this);
@@ -207,6 +215,11 @@ public class MainActivity extends AppCompatActivity
             }
 
             vibrateNotify = appSettings.getBoolean("pref_notify_vibrate", true);
+
+            // Update job if refresh rate changed
+            if (previousRefreshRate != refreshRate) {
+                FetcherJobService.scheduleFetcherJobService(this, false);
+            }
         }
     }
 
@@ -338,75 +351,6 @@ public class MainActivity extends AppCompatActivity
 
         ProgressBar spinner = (ProgressBar) previewWebView.findViewById(R.id.previewSpinner);
         spinner.setVisibility(ProgressBar.VISIBLE);
-    }
-
-    /**
-     * UpdatedDataReceiverListener
-     */
-    public void onNewData(final ArrayList<ThreadModel> threads) {
-//        updateList(threads);
-//        scheduleAlarm();
-//
-//        if (!notificationsEnabled) {
-//            return;
-//        }
-//
-//        String updatedThreadsText = "";
-//
-//        for (final ThreadModel thread : threads) {
-//            if (thread.newReplyCount > 0 && !thread.disabled) {
-//                Integer runningTotal = updatedThreads.get(thread);
-//                if (runningTotal != null) {
-//                    final Integer newTotal = runningTotal + thread.newReplyCount;
-//                    updatedThreads.put(thread, newTotal);
-//                } else {
-//                    updatedThreads.put(thread, thread.newReplyCount);
-//                }
-//            }
-//        }
-//
-//        for (Map.Entry<ThreadModel, Integer> entry : updatedThreads.entrySet()) {
-//            updatedThreadsText += entry.getKey().getTruncatedTitle() +
-//                    " (+" + entry.getValue() + ")" + "\n";
-//        }
-//
-//        Intent resultIntent = new Intent(this, MainActivity.class);
-//        resultIntent.putExtra("cheese", "yes");
-//
-//        PendingIntent resultPendingIntent =
-//            PendingIntent.getActivity(
-//                this,
-//                0,
-//                resultIntent,
-//                PendingIntent.FLAG_UPDATE_CURRENT
-//            );
-//
-//        final int defaults = (vibrateNotify && canVibrate) ? NotificationCompat.DEFAULT_ALL :
-//                NotificationCompat.DEFAULT_LIGHTS | NotificationCompat.DEFAULT_SOUND;
-//
-//        NotificationCompat.Builder builder =
-//            (android.support.v7.app.NotificationCompat.Builder)
-//                new NotificationCompat.Builder(this)
-//                    .setSmallIcon(R.mipmap.ic_launcher)
-//                    .setStyle(new NotificationCompat.BigTextStyle().bigText(updatedThreadsText))
-//                    .setContentTitle("New replies!")
-//                    .setContentText("New posts in " +
-//                            Integer.toString(updatedThreads.size()) + " thread(s).")
-//                    .setPriority(NotificationCompat.PRIORITY_HIGH)
-//                    .setDefaults(defaults)
-//                    .setContentIntent(resultPendingIntent);
-//
-//        if (!vibrateNotify) {
-//            // Workaround to prevent vibrate even when the device is in vibrate mode
-//            builder.setVibrate(new long[]{0L});
-//        }
-//        // Gets an instance of the NotificationManager service
-//        NotificationManager notificationManager =
-//                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-//
-//        // Builds the notification and issues it.
-//        builder.setAutoCancel(true);
-//        notificationManager.notify(Common.NOTIFICATION_ID, builder.build());
     }
 
     public void fadeViewClicked(final View view) {
@@ -638,6 +582,21 @@ public class MainActivity extends AppCompatActivity
 
         dialog.show();
     }
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = getString(R.string.notification_channel_name_updated_thread);
+            String description = getString(R.string.notification_channel_desc_updated_thread);
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(Common.CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+    }
 
     private void updateNoThreadsText() {
         if (listDataSource.size() == 0) {
@@ -714,10 +673,10 @@ public class MainActivity extends AppCompatActivity
         }
 
         final int dupeThreadIndex = getThreadIndex(board, id);
-        if (dupeThreadIndex > 0) {
+        if (dupeThreadIndex > -1) {
             Toast.makeText(MainActivity.this,
                     resources.getString(R.string.duplicate_thread),
-                    Toast.LENGTH_SHORT).show();
+                    Toast.LENGTH_LONG).show();
             highlightListItem(dupeThreadIndex, fadeDuration * 4);
             return;
         }
