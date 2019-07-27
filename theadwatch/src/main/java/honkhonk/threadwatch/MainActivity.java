@@ -2,7 +2,6 @@ package honkhonk.threadwatch;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.job.JobInfo;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -53,7 +52,6 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 
 import honkhonk.threadwatch.adapters.ThreadListAdapter;
 import honkhonk.threadwatch.helpers.Common;
@@ -478,12 +476,23 @@ public class MainActivity extends AppCompatActivity
         Calendar latestDate = Calendar.getInstance();
         latestDate.setTimeInMillis(thread.latestTime * 1000);
 
+        final Calendar currentDate = Calendar.getInstance();
+        final int dayInMillis = 24 * 60 * 60 * 1000;
+
+        final int addedDiff = ((int)((currentDate.getTimeInMillis() / dayInMillis)
+                - (int)(thread.dateAdded.getTimeInMillis() / dayInMillis)));
+
+        final int postedDiff = ((int)((currentDate.getTimeInMillis() / dayInMillis)
+                - (int)(createDate.getTimeInMillis() / dayInMillis)));
+
+        final int latestDiff = ((int)((currentDate.getTimeInMillis() / dayInMillis)
+                - (int)(latestDate.getTimeInMillis() / dayInMillis)));
+
         final String threadData =
-            "Added on: " + thread.dateAdded.getTime() + "\n" +
-            "Posted on: " + createDate.getTime() + "\n" +
-            "Latest on: " + latestDate.getTime() + "\n" +
-            "Replies: " + thread.replyCount +
-            " | Images: " + thread.imageCount + "\n\n" +
+            getString(R.string.info_added, addedDiff, thread.dateAdded.getTime()) + "\n\n" +
+            getString(R.string.info_posted, postedDiff, createDate.getTime()) + "\n\n" +
+            getString(R.string.info_latest, latestDiff, latestDate.getTime()) + "\n\n" +
+            getString(R.string.info_stats, thread.replyCount, thread.imageCount) + "\n\n" +
             thread.getSanitizedComment() + "\n\n";
 
         builder.setMessage(threadData);
@@ -505,8 +514,8 @@ public class MainActivity extends AppCompatActivity
                 refreshList();
 
                 Snackbar.make(findViewById(android.R.id.content),
-                        getResources().getString(R.string.thread_menu_deleted) +  " " +
-                                removedThread.getTitle(),
+                        getResources().getString(R.string.thread_menu_deleted) +  " \"" +
+                                removedThread.getTitle() + "\"",
                         Snackbar.LENGTH_LONG)
                         .setAction(R.string.thread_menu_undo, new View.OnClickListener() {
                             @Override

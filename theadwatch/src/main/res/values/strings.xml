@@ -11,7 +11,7 @@
     <string name="add_thread_dialog_title">Add Thread</string>
     <string name="add_thread_dialog_input_hint">Paste a thread url</string>
 
-    <string name="no_threads_message">You aren\'t watching any threads. Add some!</string>
+    <string name="no_threads_message">You aren\'t watching any threads. Add some!\nOpen a 4chan thread in your favorite browser and use the sharing option.</string>
     <string name="refresh_error">Unable to refresh threads. Check network connection.</string>
     <string name="no_thread_data"> </string>
     <string name="refresh_for_thread_data">Refresh to get thread data</string>
@@ -66,7 +66,11 @@
     <string name="pref_notify_vibrate_disabled">Your device cannot vibrate!</string>
     <string name="pref_notify_vibrate_sysmanaged">Manage notification vibration in the Android notification settings!</string>
 
-
     <string name="notification_channel_name_updated_thread">Thread Updated</string>
     <string name="notification_channel_desc_updated_thread">New posts in a thread</string>
+
+    <string name="info_added">Added %1d day(s) ago on:\n%2s</string>
+    <string name="info_posted">Posted %1d day(s) ago on:\n%2s</string>
+    <string name="info_latest">Latest %1d day(s) ago on:\n%2s</string>
+    <string name="info_stats">Replies: %1d | Images: %2d</string>
 </resources>
