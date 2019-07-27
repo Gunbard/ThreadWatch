@@ -118,7 +118,6 @@ public class ThreadsRetriever implements PostsRetriever.PostsRetrieverListener {
     public void postsRetrievalFailed(final Context context, final ThreadModel thread) {
         Log.d(TAG, "Posts failed to retrieve");
 
-        thread.notFound = !thread.disabled;
         failureOccurred = !thread.disabled;
         retrievedThreads.add(thread);
         processThreadQueue(context);

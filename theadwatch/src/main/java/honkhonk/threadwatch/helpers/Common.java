@@ -39,8 +39,10 @@ final public class Common {
     // Chrome extra key
     final public static String SHARE_TEXT_KEY = "android.intent.extra.TEXT";
 
-    // One minute in milliseconds
+    // Common time granularity in milliseconds
     final public static int ONE_MINUTE_IN_MILLIS = 60000;
+    final public static int ONE_HOUR_IN_MILLIS = 3600000;
+    final public static int ONE_DAY_IN_MILLIS = 86400000;
 
     // Default 5 minute refresh rate
     final public static int DEFAULT_REFRESH_TIMEOUT = 5;
