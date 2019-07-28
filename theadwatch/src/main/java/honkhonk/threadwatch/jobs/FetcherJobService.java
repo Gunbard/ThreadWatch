@@ -96,6 +96,10 @@ public class FetcherJobService extends JobService implements ThreadsRetriever.Th
 
     @Override
     public void threadsRetrieved(final ArrayList<ThreadModel> threads) {
+        Intent fetchFinishedIntent = new Intent(Common.FETCH_JOB_BROADCAST_KEY);
+        fetchFinishedIntent.putExtra(Common.FETCH_JOB_SUCCEEDED_KEY, true);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(fetchFinishedIntent);
+
         if (threads.size() == 0) {
             return;
         }
@@ -111,10 +115,6 @@ public class FetcherJobService extends JobService implements ThreadsRetriever.Th
                 break;
             }
         }
-
-        Intent fetchFinishedIntent = new Intent(Common.FETCH_JOB_BROADCAST_KEY);
-        fetchFinishedIntent.putExtra(Common.FETCH_JOB_SUCCEEDED_KEY, true);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(fetchFinishedIntent);
 
         if (!threadWasUpdated || !PreferencesDataManager.notificationsEnabled(this)) {
             return;
@@ -169,9 +169,8 @@ public class FetcherJobService extends JobService implements ThreadsRetriever.Th
                 new NotificationCompat.Builder(this, Common.CHANNEL_ID)
                         .setSmallIcon(R.mipmap.ic_launcher)
                         .setStyle(new NotificationCompat.BigTextStyle().bigText(updatedThreadsText.toString()))
-                        .setContentTitle("New replies!")
-                        .setContentText("New posts in " +
-                                updatedThreads.size() + " thread(s).")
+                        .setContentTitle(getString(R.string.notification_title))
+                        .setContentText(getString(R.string.notification_content, updatedThreads.size()))
                         .setPriority(NotificationCompat.PRIORITY_HIGH)
                         .setDefaults(defaults)
                         .setContentIntent(resultPendingIntent);
@@ -190,7 +189,7 @@ public class FetcherJobService extends JobService implements ThreadsRetriever.Th
     }
     @Override
     public void threadRetrievalFailed(final ArrayList<ThreadModel> threads) {
-        threadsRetrieved(new ArrayList<ThreadModel>());
+        threadsRetrieved(threads);
     }
 
     // Private methods

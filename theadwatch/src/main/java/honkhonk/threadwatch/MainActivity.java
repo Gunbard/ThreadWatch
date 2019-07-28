@@ -94,7 +94,6 @@ public class MainActivity extends AppCompatActivity
     private boolean sortAscending = false;
     private boolean notificationsEnabled = true;
     private boolean canVibrate = true;
-    private boolean vibrateNotify = true;
     private int refreshRate = 5;
 
     @Override
@@ -215,8 +214,6 @@ public class MainActivity extends AppCompatActivity
             if (refreshValue.length() > 0) {
                 refreshRate = Integer.parseInt(refreshValue);
             }
-
-            vibrateNotify = appSettings.getBoolean("pref_notify_vibrate", true);
 
             // Update job if refresh rate changed
             if (previousRefreshRate != refreshRate) {
@@ -476,22 +473,13 @@ public class MainActivity extends AppCompatActivity
         Calendar latestDate = Calendar.getInstance();
         latestDate.setTimeInMillis(thread.latestTime * 1000);
 
-        final Calendar currentDate = Calendar.getInstance();
-        final int dayInMillis = 24 * 60 * 60 * 1000;
-
-        final int addedDiff = ((int)((currentDate.getTimeInMillis() / dayInMillis)
-                - (int)(thread.dateAdded.getTimeInMillis() / dayInMillis)));
-
-        final int postedDiff = ((int)((currentDate.getTimeInMillis() / dayInMillis)
-                - (int)(createDate.getTimeInMillis() / dayInMillis)));
-
-        final int latestDiff = ((int)((currentDate.getTimeInMillis() / dayInMillis)
-                - (int)(latestDate.getTimeInMillis() / dayInMillis)));
-
         final String threadData =
-            getString(R.string.info_added, addedDiff, thread.dateAdded.getTime()) + "\n\n" +
-            getString(R.string.info_posted, postedDiff, createDate.getTime()) + "\n\n" +
-            getString(R.string.info_latest, latestDiff, latestDate.getTime()) + "\n\n" +
+            getString(R.string.info_added, getElapsedTime(thread.dateAdded),
+                    thread.dateAdded.getTime()) + "\n\n" +
+            getString(R.string.info_posted, getElapsedTime(createDate),
+                    createDate.getTime()) + "\n\n" +
+            getString(R.string.info_latest, getElapsedTime(latestDate),
+                    latestDate.getTime()) + "\n\n" +
             getString(R.string.info_stats, thread.replyCount, thread.imageCount) + "\n\n" +
             thread.getSanitizedComment() + "\n\n";
 
@@ -500,6 +488,30 @@ public class MainActivity extends AppCompatActivity
         final AlertDialog dialog = builder.create();
         dialog.show();
     }
+
+    private String getElapsedTime(Calendar date) {
+        final Calendar currentDate = Calendar.getInstance();
+
+        final double minuteInMillis = Common.ONE_MINUTE_IN_MILLIS;
+        final int diffInMinutes = (int)Math.floor((((currentDate.getTimeInMillis() / minuteInMillis)
+                - (date.getTimeInMillis() / minuteInMillis))));
+        if (diffInMinutes < 60) {
+            return getString(R.string.minutes_label, diffInMinutes);
+        }
+
+        final double hourInMillis = Common.ONE_HOUR_IN_MILLIS;
+        final int diffInHours = (int)Math.floor((((currentDate.getTimeInMillis() / hourInMillis)
+                - (date.getTimeInMillis() / hourInMillis))));
+        if (diffInHours < 24) {
+            return getString(R.string.hours_label, diffInHours);
+        }
+
+        final double dayInMillis = Common.ONE_DAY_IN_MILLIS;
+        final int diffInDays = (int)Math.floor((((currentDate.getTimeInMillis() / dayInMillis)
+                - (date.getTimeInMillis() / dayInMillis))));
+        return getString(R.string.days_label, diffInDays);
+    }
+
 
     private void deleteThread(final int position) {
         Animation anim = AnimationUtils.loadAnimation(MainActivity.this,
@@ -633,7 +645,6 @@ public class MainActivity extends AppCompatActivity
     private void restoreData() {
         final SharedPreferences appSettings = PreferenceManager.getDefaultSharedPreferences(this);
         refreshRate = Integer.parseInt(appSettings.getString("pref_refresh_rate", "5"));
-        vibrateNotify = appSettings.getBoolean("pref_notify_vibrate", true);
         sortMode = PreferencesDataManager.getSortMode(this);
         sortAscending = PreferencesDataManager.sortAscending(this);
         notificationsEnabled = PreferencesDataManager.notificationsEnabled(this);

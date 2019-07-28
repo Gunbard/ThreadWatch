@@ -4,7 +4,6 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -16,8 +15,6 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-import honkhonk.threadwatch.MainActivity;
-import honkhonk.threadwatch.R;
 import honkhonk.threadwatch.ThreadWatch;
 import honkhonk.threadwatch.models.PostModel;
 import honkhonk.threadwatch.models.PostsResponse;
@@ -93,6 +90,8 @@ public class PostsRetriever {
                 (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
+                        thread.notFound = false;
+
                         final PostsResponse postsResponse =
                                 (new Gson()).fromJson(response.toString(), PostsResponse.class);
 
@@ -107,6 +106,10 @@ public class PostsRetriever {
                 }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
+                        if (error.networkResponse.statusCode == 404) {
+                            thread.notFound = true;
+                        }
+
                         for (final PostsRetrieverListener listener : listeners) {
                             listener.postsRetrievalFailed(context, thread);
                         }
