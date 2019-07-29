@@ -2,6 +2,7 @@ package honkhonk.threadwatch;
 
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.net.Uri;
@@ -13,6 +14,7 @@ import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.view.MenuItem;
 import android.widget.Toast;
 
@@ -269,12 +271,31 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
             // Parse backup data to validate
             try {
-                ArrayList<ThreadModel> backedUpThreads = (new Gson()).fromJson(backupDataAsString,
+                final ArrayList<ThreadModel>backedUpThreads = (new Gson()).fromJson(backupDataAsString,
                         new TypeToken<ArrayList<ThreadModel>>() {}.getType());
-                if (backedUpThreads.size() > 0) {
-                    ThreadDataManager.updateThreadList(getActivity(), backedUpThreads);
-                } else {
+                if (backedUpThreads.size() == 0) {
                     restoreFailed = true;
+                } else {
+                    AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity());
+                    dialog.setTitle(R.string.pref_backup_import_confirm_title);
+                    dialog.setMessage(R.string.pref_backup_import_confirm);
+                    dialog.setNeutralButton(R.string.pref_backup_import, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            ThreadDataManager.updateThreadList(getActivity(), backedUpThreads);
+
+                            // Thread list should refresh
+                            Intent shouldRefreshIntent = new Intent();
+                            shouldRefreshIntent.putExtra(Common.SETTINGS_CLOSED_SHOULD_REFRESH, true);
+                            getActivity().setResult(Activity.RESULT_OK, shouldRefreshIntent);
+
+                            Toast.makeText(SettingsFragment.this.getActivity(),
+                                    resources.getString(R.string.pref_backup_import_success),
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    dialog.create();
+                    dialog.show();
                 }
             } catch (Exception e) {
                 restoreFailed = true;
@@ -283,15 +304,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             if (restoreFailed) {
                 Toast.makeText(this.getActivity(),
                         resources.getString(R.string.pref_backup_import_fail),
-                        Toast.LENGTH_SHORT).show();
-            } else {
-                // Thread list should refresh
-                Intent shouldRefreshIntent = new Intent();
-                shouldRefreshIntent.putExtra(Common.SETTINGS_CLOSED_SHOULD_REFRESH, true);
-                getActivity().setResult(Activity.RESULT_OK, shouldRefreshIntent);
-
-                Toast.makeText(this.getActivity(),
-                        resources.getString(R.string.pref_backup_import_success),
                         Toast.LENGTH_SHORT).show();
             }
         }
