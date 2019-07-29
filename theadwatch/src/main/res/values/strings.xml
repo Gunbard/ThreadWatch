@@ -74,6 +74,7 @@
     <string name="pref_backup_export">Export</string>
     <string name="pref_backup_import_summary">Import list of threads via a backup file (&lt;filename&gt;.json).</string>
     <string name="pref_backup_export_summary">Export the list of threads to a backup file.</string>
+    <string name="pref_backup_import_confirm_title">Restore From Backup</string>
     <string name="pref_backup_import_confirm">File OK! Are you sure you want to import this backup? Your existing list of threads will be overwritten.</string>
     <string name="pref_backup_import_success">Backup file restore OK!</string>
     <string name="pref_backup_import_fail">There\'s something wrong with the backup file, brah.</string>
@@ -85,9 +86,9 @@
     <string name="notification_channel_name_updated_thread">Thread Updated</string>
     <string name="notification_channel_desc_updated_thread">New posts in a thread</string>
 
-    <string name="minutes_label">%1d minutes(s)</string>
+    <string name="minutes_label">%1d minute(s)</string>
     <string name="hours_label">%1d hour(s)</string>
-    <string name="days_label">%1d days(s)</string>
+    <string name="days_label">%1d day(s)</string>
 
     <string name="info_added">Added %1s ago on:\n%2s</string>
     <string name="info_posted">Posted %1s ago on:\n%2s</string>
