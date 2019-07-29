@@ -11,7 +11,7 @@
     <string name="add_thread_dialog_title">Add Thread</string>
     <string name="add_thread_dialog_input_hint">Paste a thread url</string>
 
-    <string name="no_threads_message">You aren\'t watching any threads. Add some!\nOpen a 4chan thread in your favorite browser and use the sharing option.</string>
+    <string name="no_threads_message">You aren\'t watching any threads. Add some!\n\nOpen a 4chan thread in your favorite browser and use the sharing option.</string>
     <string name="refresh_error">Unable to refresh threads. Check network connection.</string>
     <string name="no_thread_data"> </string>
     <string name="refresh_for_thread_data">Refresh to get thread data</string>
@@ -43,6 +43,7 @@
 
     <string name="title_activity_settings">Settings</string>
     <string name="pref_category_refresh">Refresh</string>
+    <string name="pref_category_backup">Backup</string>
     <string name="pref_refresh_rate">Refresh Rate</string>
     <string-array name="pref_refresh_titles">
         <item>1 minute</item>
@@ -68,6 +69,18 @@
     <string name="pref_notify_vibrate">Vibrate</string>
     <string name="pref_notify_vibrate_disabled">Your device cannot vibrate!</string>
     <string name="pref_notify_vibrate_sysmanaged">Manage notification vibration in the Android notification settings!</string>
+
+    <string name="pref_backup_import">Import</string>
+    <string name="pref_backup_export">Export</string>
+    <string name="pref_backup_import_summary">Import list of threads via a backup file (&lt;filename&gt;.json).</string>
+    <string name="pref_backup_export_summary">Export the list of threads to a backup file.</string>
+    <string name="pref_backup_import_confirm">File OK! Are you sure you want to import this backup? Your existing list of threads will be overwritten.</string>
+    <string name="pref_backup_import_success">Backup file restore OK!</string>
+    <string name="pref_backup_import_fail">There\'s something wrong with the backup file, brah.</string>
+    <string name="pref_backup_fail_toast">Couldn\'t import/export backup file!</string>
+    <string name="pref_backup_export_ok_toast">Export backup file OK!</string>
+    <string name="pref_backup_export_fail_toast">Export backup file failed!</string>
+    <string name="pref_backup_export_disabled">You don\'t have any watched threads to export.</string>
 
     <string name="notification_channel_name_updated_thread">Thread Updated</string>
     <string name="notification_channel_desc_updated_thread">New posts in a thread</string>

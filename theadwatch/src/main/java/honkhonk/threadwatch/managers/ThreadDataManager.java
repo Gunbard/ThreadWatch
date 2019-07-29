@@ -27,6 +27,12 @@ public class ThreadDataManager {
                 new TypeToken<ArrayList<ThreadModel>>() {}.getType());
     }
 
+    public static String getThreadListAsString(Context context) {
+        final SharedPreferences savedPrefs = context.getSharedPreferences(Common.PREFS_NAME, 0);
+        final String listDataAsJson = savedPrefs.getString(Common.SAVED_THREAD_DATA, null);
+        return (listDataAsJson == null) ? "{}" : listDataAsJson;
+    }
+
     public static void addThread(Context context, ThreadModel newThread) {
         ArrayList<ThreadModel> threadList = getThreadList(context);
         if (threadList == null) {
