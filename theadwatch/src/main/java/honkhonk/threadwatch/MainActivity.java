@@ -204,6 +204,8 @@ public class MainActivity extends AppCompatActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == Common.SETTINGS_CLOSED_ID) {
+            final boolean shouldRefresh = (data != null) &&
+                    data.getBooleanExtra(Common.SETTINGS_CLOSED_SHOULD_REFRESH, false);
             final int previousRefreshRate = refreshRate;
 
             // Update refresh rate
@@ -215,13 +217,11 @@ public class MainActivity extends AppCompatActivity
                 refreshRate = Integer.parseInt(refreshValue);
             }
 
-            // Update job if refresh rate changed
-            if (previousRefreshRate != refreshRate) {
-                if (refreshRate > 0) {
-                    FetcherJobService.scheduleFetcherJobService(this, false);
-                } else {
-                    FetcherJobService.stopFetcher(this);
-                }
+            // Update job if refresh rate changed or an import occurred
+            if ((previousRefreshRate != refreshRate && refreshRate > 0) || shouldRefresh) {
+                FetcherJobService.scheduleFetcherJobService(this, false);
+            } else if (refreshRate == 0){
+                FetcherJobService.stopFetcher(this);
             }
         }
     }

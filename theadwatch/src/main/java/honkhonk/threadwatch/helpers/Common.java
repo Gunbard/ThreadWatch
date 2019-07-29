@@ -15,14 +15,19 @@ final public class Common {
         BUMP_DATE
     }
 
-    // Unique request code for refreshing in the background
-    final public static int ALARM_ID = 12345;
+    // Unique request code for importing backup files
+    final public static int IMPORT_REQUEST_CODE = 42;
+
+    // Unique request code for exporting backup files
+    final public static int EXPORT_REQUEST_CODE = 43;
 
     // Unique ID for accessing the notification
     final public static int NOTIFICATION_ID = 67890;
 
     // Unique ID for getting a notification that the settings closed
     final public static int SETTINGS_CLOSED_ID = 56789;
+
+    final public static String SETTINGS_CLOSED_SHOULD_REFRESH = "SettingsClosedShouldRefresh";
 
     // Helper to index SortOptions. This is not built into Java for some reason.
     final public static SortOptions[] sortOptionsValues = SortOptions.values();

@@ -40,4 +40,15 @@
             android:key="pref_notify_vibrate"
             android:title="@string/pref_notify_vibrate" />
     </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/pref_category_backup">
+        <Preference
+            android:title="@string/pref_backup_import"
+            android:summary="@string/pref_backup_import_summary"
+            android:key="pref_backup_import" />
+        <Preference
+            android:title="@string/pref_backup_export"
+            android:summary="@string/pref_backup_export_summary"
+            android:key="pref_backup_export" />
+    </PreferenceCategory>
 </PreferenceScreen>
