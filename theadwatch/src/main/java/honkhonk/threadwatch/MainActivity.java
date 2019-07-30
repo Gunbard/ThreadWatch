@@ -264,8 +264,9 @@ public class MainActivity extends AppCompatActivity
                 settingsIntent.putExtra(Common.PREFS_CAN_VIBRATE, canVibrate);
                 startActivityForResult(settingsIntent, Common.SETTINGS_CLOSED_ID);
                 return true;
-//            case R.id.menu_help:
-//                return true;
+            case R.id.menu_help:
+                showHelp();
+                return true;
 //            case R.id.menu_about:
 //                return true;
             default:
@@ -754,5 +755,27 @@ public class MainActivity extends AppCompatActivity
         View background = itemView.findViewById(R.id.itemBackground);
         background.setAlpha(1.0f);
         background.animate().alpha(0.0f).setDuration(duration);
+    }
+
+    private void showHelp() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.menu_help);
+        builder.setMessage(R.string.help_summary);
+        builder.setNeutralButton(R.string.help_github, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                final Intent browserIntent =
+                        new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/Gunbard/ThreadWatch"));
+                startActivity(browserIntent);
+            }
+        });
+        builder.setNegativeButton(R.string.action_close, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        final AlertDialog dialog = builder.create();
+        dialog.show();
     }
 }
