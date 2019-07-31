@@ -377,15 +377,6 @@ public class MainActivity extends AppCompatActivity
     /**
      * Private methods
      */
-    private void updateList(final ArrayList<ThreadModel> threads) {
-        listDataSource.clear();
-        listDataSource.addAll(threads);
-
-        // Sort threads
-        ThreadSorter.sort(listDataSource, Common.sortOptionsValues[sortMode], sortAscending);
-
-        listAdapter.notifyDataSetChanged();
-    }
 
     private void setNotificationEnabledState(final boolean enabled) {
         notificationsEnabled = enabled;
@@ -415,8 +406,7 @@ public class MainActivity extends AppCompatActivity
             return;
         }
 
-        if (ThreadDataManager.getThreadList(this).size() == 0)
-        {
+        if (ThreadDataManager.getThreadList(this).size() == 0) {
             swipeContainer.setRefreshing(false);
             return;
         }
