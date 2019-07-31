@@ -415,6 +415,12 @@ public class MainActivity extends AppCompatActivity
             return;
         }
 
+        if (ThreadDataManager.getThreadList(this).size() == 0)
+        {
+            swipeContainer.setRefreshing(false);
+            return;
+        }
+
         listView.setEnabled(false);
         swipeContainer.setRefreshing(true);
         listView.animate().alpha(0.5f).setDuration(fadeDuration);

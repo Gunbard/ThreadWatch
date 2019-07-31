@@ -108,7 +108,9 @@
         Add new threads by sharing a link (e.g. https://boards.4channel.org/5/thread/123456) to ThreadWatch.
         You can use your favorite browser\'s share feature while viewing a thread.
         \n\nLong-press a thread in the list for options to disable, view stats, delete, etc.
-        \n\nTap the bell icon to toggle showing notifications. ThreadWatch will continue to refresh as long the refresh rate is not \"Never\".
+        \n\nTap the bell icon to toggle showing notifications.
+        ThreadWatch will continue to refresh as long the refresh rate is not \"Never\".
+        Swipe down on the list to refresh immediately.
         \n\nI\'d just like to interject, but this will always be free and open source software.
     </string>
 
