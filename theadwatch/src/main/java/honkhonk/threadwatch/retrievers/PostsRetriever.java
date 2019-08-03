@@ -106,7 +106,9 @@ public class PostsRetriever {
                 }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        if (error.networkResponse.statusCode == 404) {
+                        if (error != null &&
+                            error.networkResponse != null &&
+                            error.networkResponse.statusCode == 404) {
                             thread.notFound = true;
                         }
 
