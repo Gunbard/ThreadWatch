@@ -120,10 +120,9 @@ public class FetcherJobService extends JobService implements ThreadsRetriever.Th
             return;
         }
 
-        final Vibrator vibrator = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
-        boolean canVibrate = vibrator.hasVibrator();
+        // Update running totals for the notification
         StringBuilder updatedThreadsText = new StringBuilder();
-
+        int newThreadCount = 0;
         for (final ThreadModel thread : threads) {
             if (thread.newReplyCount > 0 && !thread.disabled && thread.replyCountDelta > 0) {
                 updatedThreadsText.append(thread.getTruncatedTitle());
@@ -140,6 +139,7 @@ public class FetcherJobService extends JobService implements ThreadsRetriever.Th
                 }
 
                 updatedThreadsText.append(")\n");
+                newThreadCount++;
             }
         }
 
@@ -160,7 +160,10 @@ public class FetcherJobService extends JobService implements ThreadsRetriever.Th
                 );
 
         final SharedPreferences appSettings = PreferenceManager.getDefaultSharedPreferences(this);
+
         final boolean vibrateNotify = appSettings.getBoolean("pref_notify_vibrate", true);
+        final Vibrator vibrator = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
+        boolean canVibrate = vibrator.hasVibrator();
 
         final int defaults = (vibrateNotify && canVibrate) ? NotificationCompat.DEFAULT_ALL :
                 NotificationCompat.DEFAULT_LIGHTS | NotificationCompat.DEFAULT_SOUND;
@@ -170,7 +173,7 @@ public class FetcherJobService extends JobService implements ThreadsRetriever.Th
                         .setSmallIcon(R.mipmap.ic_launcher)
                         .setStyle(new NotificationCompat.BigTextStyle().bigText(updatedThreadsText.toString()))
                         .setContentTitle(getString(R.string.notification_title))
-                        .setContentText(getString(R.string.notification_content, updatedThreads.size()))
+                        .setContentText(getString(R.string.notification_content, newThreadCount))
                         .setPriority(NotificationCompat.PRIORITY_HIGH)
                         .setDefaults(defaults)
                         .setContentIntent(resultPendingIntent);
