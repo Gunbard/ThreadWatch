@@ -1,4 +1,4 @@
-package honkhonk.threadwatch;
+package honkhonk.threadwatch.activities;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -47,6 +47,8 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
@@ -55,12 +57,15 @@ import com.google.android.material.snackbar.Snackbar;
 import java.util.ArrayList;
 import java.util.Calendar;
 
+import honkhonk.threadwatch.R;
 import honkhonk.threadwatch.adapters.ThreadListAdapter;
+import honkhonk.threadwatch.fragments.RepliesFragment;
 import honkhonk.threadwatch.helpers.Common;
 import honkhonk.threadwatch.helpers.ThreadSorter;
 import honkhonk.threadwatch.jobs.FetcherJobService;
 import honkhonk.threadwatch.managers.PreferencesDataManager;
 import honkhonk.threadwatch.managers.ThreadDataManager;
+import honkhonk.threadwatch.models.PostModel;
 import honkhonk.threadwatch.models.ThreadModel;
 
 public class MainActivity extends AppCompatActivity
@@ -143,6 +148,7 @@ public class MainActivity extends AppCompatActivity
                 final Intent browserIntent =
                         new Intent(Intent.ACTION_VIEW, Uri.parse(url));
                 thread.replyCountDelta = 0;
+                thread.newRepliesToYou = false;
                 ThreadDataManager.updateThread(MainActivity.this, thread);
                 listAdapter.notifyDataSetChanged();
                 startActivity(browserIntent);
@@ -313,8 +319,12 @@ public class MainActivity extends AppCompatActivity
                 ThreadDataManager.updateThread(MainActivity.this, thread);
                 refreshList();
                 return true;
+            case R.id.thread_menu_replies:
+                showThreadReplies(info.position);
+                return true;
             case R.id.thread_menu_mark_read:
                 thread.replyCountDelta = 0;
+                thread.newRepliesToYou = false;
                 ThreadDataManager.updateThread(MainActivity.this, thread);
                 refreshList();
                 return true;
@@ -476,6 +486,18 @@ public class MainActivity extends AppCompatActivity
 
         final AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    private void showThreadReplies(final int position) {
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        Fragment existingFragment = getSupportFragmentManager().findFragmentByTag("repliesDetails");
+        if (existingFragment != null) {
+            transaction.remove(existingFragment);
+        }
+        transaction.addToBackStack(null);
+
+        RepliesFragment repliesFragment = new RepliesFragment(this, listDataSource.get(position));
+        repliesFragment.show(transaction, "repliesDetails");
     }
 
     private String getElapsedTime(Calendar date) {
@@ -685,12 +707,36 @@ public class MainActivity extends AppCompatActivity
             return;
         }
 
+        // Can be used for tracking (you)s
+        String replyId = null;
+        String urlFragment = url.getEncodedFragment();
+        if (urlFragment != null) {
+            // Discard first letter, which can be a 'p' or 'q'
+            replyId = urlFragment.substring(1);
+        }
+
         final int dupeThreadIndex = getThreadIndex(board, id);
         if (dupeThreadIndex > -1) {
-            Toast.makeText(MainActivity.this,
-                    resources.getString(R.string.duplicate_thread),
-                    Toast.LENGTH_LONG).show();
-            highlightListItem(dupeThreadIndex, fadeDuration * 4);
+            if (replyId == null) {
+                Toast.makeText(MainActivity.this,
+                        resources.getString(R.string.duplicate_thread),
+                        Toast.LENGTH_LONG).show();
+                highlightListItem(dupeThreadIndex, fadeDuration * 4);
+            } else {
+                ThreadModel thread = listDataSource.get(dupeThreadIndex);
+                if (!thread.replyIds.containsKey(replyId)) {
+                    thread.replyIds.put(replyId, new ArrayList<PostModel>());
+                    ThreadDataManager.updateThread(this, thread);
+                    Toast.makeText(MainActivity.this,
+                            resources.getString(R.string.reply_tracked, replyId),
+                            Toast.LENGTH_LONG).show();
+                    refresh();
+                } else {
+                    Toast.makeText(MainActivity.this,
+                            resources.getString(R.string.reply_already_tracked),
+                            Toast.LENGTH_LONG).show();
+                }
+            }
             return;
         }
 
@@ -700,10 +746,19 @@ public class MainActivity extends AppCompatActivity
         newThread.dateAdded = Calendar.getInstance();
         newThread.firstRefresh = true;
 
+        if (replyId != null) {
+            newThread.replyIds.put(replyId, new ArrayList<PostModel>());
+        }
+
         ThreadDataManager.addThread(this, newThread);
 
-        Toast.makeText(MainActivity.this, "Added " + url,
-                Toast.LENGTH_SHORT).show();
+        String toastMessage = getString(R.string.add_thread_message, url);
+        if (replyId != null) {
+            toastMessage = getString(R.string.add_thread_track_reply,
+                    threadUrl.replace('#' + urlFragment, ""), replyId);
+        }
+
+        Toast.makeText(MainActivity.this, toastMessage, Toast.LENGTH_LONG).show();
 
         refresh();
     }

@@ -68,4 +68,20 @@ public class PostModel {
      */
     @SerializedName("time")
     public int time;
+
+    /**
+     * Post does not exist or was deleted
+     */
+    public boolean failed;
+
+    /**
+     * @return The comment with any HTML sanitized/escaped, blank string if no comment
+     */
+    public String getSanitizedComment() {
+        if (comment != null && !comment.equals("")) {
+            return android.text.Html.fromHtml(comment).toString();
+        } else {
+            return "";
+        }
+    }
 }

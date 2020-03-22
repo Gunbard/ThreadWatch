@@ -23,6 +23,8 @@ public class ThreadDataManager {
             return new ArrayList<>();
         }
 
+        // TODO: Handle different versions of the ThreadModel so it won't crash
+
         return (new Gson()).fromJson(listDataAsJson,
                 new TypeToken<ArrayList<ThreadModel>>() {}.getType());
     }

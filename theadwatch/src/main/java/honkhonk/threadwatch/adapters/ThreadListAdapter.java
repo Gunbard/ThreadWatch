@@ -1,15 +1,16 @@
 package honkhonk.threadwatch.adapters;
 
 import android.content.Context;
-import androidx.annotation.IdRes;
-import androidx.annotation.LayoutRes;
-import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
+
+import androidx.annotation.IdRes;
+import androidx.annotation.LayoutRes;
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 
 import java.util.ArrayList;
 
@@ -79,6 +80,13 @@ public class ThreadListAdapter extends ArrayAdapter<ThreadModel> {
             newPosts.setText("(" + thread.replyCountDelta + ")") ;
         } else {
             newPosts.setText("");
+        }
+
+        if (thread.newRepliesToYou) {
+            newPosts.setTextColor(ContextCompat.getColor((Context) context, R.color.colorYou));
+        } else {
+            newPosts.setTextColor(ContextCompat.getColor((Context) context,
+                    android.R.color.secondary_text_light));
         }
 
         if (thread.disabled) {

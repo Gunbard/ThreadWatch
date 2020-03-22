@@ -12,12 +12,15 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
+import android.util.Log;
+
 import androidx.core.app.NotificationCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.HashMap;
-import honkhonk.threadwatch.MainActivity;
+
+import honkhonk.threadwatch.activities.MainActivity;
 import honkhonk.threadwatch.R;
 import honkhonk.threadwatch.helpers.Common;
 import honkhonk.threadwatch.managers.PreferencesDataManager;
@@ -110,7 +113,7 @@ public class FetcherJobService extends JobService implements ThreadsRetriever.Th
 
         boolean threadWasUpdated = false;
         for (final ThreadModel thread : threads) {
-            if (thread.newReplyCount > 0 && !thread.disabled) {
+            if (thread.newReplyCount > 0 && !thread.disabled && thread.isAvailable()) {
                 threadWasUpdated = true;
                 break;
             }
@@ -138,7 +141,11 @@ public class FetcherJobService extends JobService implements ThreadsRetriever.Th
                     updatedThreadsText.append(thread.newReplyCount);
                 }
 
-                updatedThreadsText.append(")\n");
+                if (thread.newRepliesToYou) {
+                    updatedThreadsText.append(") (You)\n");
+                } else {
+                    updatedThreadsText.append(")\n");
+                }
                 newThreadCount++;
             }
         }

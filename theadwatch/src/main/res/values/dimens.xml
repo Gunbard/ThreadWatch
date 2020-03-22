@@ -4,4 +4,5 @@
     <dimen name="activity_vertical_margin">0dp</dimen>
 
     <dimen name="add_thread_input_padding">16dp</dimen>
+    <dimen name="thread_replies_view_padding">16dp</dimen>
 </resources>

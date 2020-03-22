@@ -1,4 +1,4 @@
-package honkhonk.threadwatch;
+package honkhonk.threadwatch.activities;
 
 
 import android.app.Activity;
@@ -29,6 +29,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Calendar;
 
+import honkhonk.threadwatch.R;
 import honkhonk.threadwatch.helpers.Common;
 import honkhonk.threadwatch.managers.ThreadDataManager;
 import honkhonk.threadwatch.models.ThreadModel;

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/repliesLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="@dimen/thread_replies_view_padding">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/addReplyField"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left"
+            android:layout_toLeftOf="@id/addReplyButton"
+            android:ems="10"
+            android:gravity="left"
+            android:hint="@string/reply_add_hint"
+            android:inputType="textShortMessage|number" />
+
+        <ImageButton
+            android:id="@+id/addReplyButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:background="@android:color/transparent"
+            app:srcCompat="@android:drawable/ic_menu_add" />
+
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/noTrackedRepliesLabel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="@string/thread_replies_empty"
+        android:visibility="visible" />
+
+    <ExpandableListView
+        android:id="@+id/repliesList"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:childDivider="@color/colorClosedThread"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="2dp">
+
+    </ExpandableListView>
+
+</LinearLayout>

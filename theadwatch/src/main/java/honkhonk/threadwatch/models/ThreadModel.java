@@ -1,6 +1,8 @@
 package honkhonk.threadwatch.models;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 
 /**
  * Model of a basic thread
@@ -85,6 +87,11 @@ public class ThreadModel {
     public boolean firstRefresh;
 
     /**
+     * Whether or not the thread has new replies to (you)
+     */
+    public boolean newRepliesToYou;
+
+    /**
      * The UNIX timestamp (in seconds) of when the thread was made
      */
     public long time;
@@ -103,6 +110,12 @@ public class ThreadModel {
      * The last post's id
      */
     public long lastPostId;
+
+    /**
+     * List of reply ids to track using the post number as the key and the value
+     * as a list of comment strings that reference it
+     */
+    public HashMap<String, ArrayList<PostModel>> replyIds = new HashMap<>();
 
     /**
      * @return The url of the thread, null if the board or id are blank
@@ -151,7 +164,8 @@ public class ThreadModel {
     }
 
     /**
-     * @return The comment with any HTML sanitized/escaped, blank string if no comment
+     * @return The comment with any HTML sanitized/escaped and new lines removed,
+     * blank string if no comment
      */
     public String getSanitizedComment() {
         if (comment != null && !comment.equals("")) {
@@ -161,6 +175,14 @@ public class ThreadModel {
             return "";
         }
     }
+
+    /**
+     * @return Whether the thread is available or not
+     */
+    public boolean isAvailable() {
+        return !(closed || archived || disabled || notFound);
+    }
+
 
     @Override
     public int hashCode()

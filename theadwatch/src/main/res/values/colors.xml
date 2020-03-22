@@ -8,4 +8,5 @@
     <color name="colorArchivedThread">#c6c6c6</color>
     <color name="colorClosedThread">#b3b3b3</color>
     <color name="colorNotFoundThread">#8bff0000</color>
+    <color name="colorYou">#A9FF0000</color>
 </resources>

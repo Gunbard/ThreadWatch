@@ -5,6 +5,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 
+import honkhonk.threadwatch.R;
 import honkhonk.threadwatch.models.PostModel;
 import honkhonk.threadwatch.models.ThreadModel;
 
@@ -101,10 +102,12 @@ public class ThreadsRetriever implements PostsRetriever.PostsRetrieverListener {
         thread.imageCount = op.imageCount;
         thread.archived = (op.archived == 1);
         thread.closed = (op.closed == 1);
-        thread.notFound = false;
         thread.firstRefresh = false;
         thread.latestTime = latest.time;
         thread.lastPostId = latest.number;
+        thread.newRepliesToYou = thread.newRepliesToYou || hasNewRepliesToYou(thread, posts);
+
+        retrieveReplyComments(context, thread, posts);
 
         retrievedThreads.add(thread);
         processThreadQueue(context);
@@ -152,6 +155,80 @@ public class ThreadsRetriever implements PostsRetriever.PostsRetrieverListener {
                 listener.threadRetrievalFailed(retrievedThreads);
             } else {
                 listener.threadsRetrieved(retrievedThreads);
+            }
+        }
+    }
+
+    /**
+     * Checks the latest posts to see if any of the watched replies were referenced
+     * @param thread The thread to check
+     * @param posts The posts referenced
+     * @return True if a replyId was quoted, false otherwise
+     */
+    private boolean hasNewRepliesToYou(ThreadModel thread, final ArrayList<PostModel> posts) {
+        if (thread.replyIds.isEmpty()) {
+            return false;
+        }
+
+        for (int i = (posts.size() - thread.replyCountDelta); i < posts.size(); i++) {
+            PostModel post = posts.get(i);
+            for (String replyId : thread.replyIds.keySet()) {
+                if (post.comment != null && post.comment.contains(replyId)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Regenerates the replyIds hash to populate each replyId to contain the comments that
+     * reference it.
+     * @param context Context for the retrieval
+     * @param thread The thread to check
+     * @param posts The posts in the thread
+     */
+    private void retrieveReplyComments(Context context, ThreadModel thread, final ArrayList<PostModel> posts) {
+        if (thread.replyIds.isEmpty()) {
+            return;
+        }
+
+        // Clear existing replyIds values
+        for (String replyId : thread.replyIds.keySet()) {
+            ArrayList<PostModel> replyComments = thread.replyIds.get(replyId);
+            replyComments.clear();
+        }
+
+        // Check each post comment against the tracked reply ids and add if the id is referenced
+        for (PostModel post : posts) {
+            for (String replyId : thread.replyIds.keySet()) {
+                ArrayList<PostModel> replyComments = thread.replyIds.get(replyId);
+
+                // Ensure original post is first
+                if (Integer.toString(post.number).equals(replyId)) {
+                    replyComments.add(0, post);
+                }
+
+                if (post.comment != null && post.comment.contains(replyId)) {
+                    // Add the comment to the replyId hash
+                    replyComments.add(post);
+                }
+            }
+        }
+
+        // Mark posts that weren't found
+        for (String replyId : thread.replyIds.keySet()) {
+            ArrayList<PostModel> replyComments = thread.replyIds.get(replyId);
+            if (replyComments == null || replyComments.size() == 0) {
+                PostModel failedPost = new PostModel();
+                failedPost.number = Integer.parseInt(replyId);
+                failedPost.comment = context.getString(R.string.reply_not_found);
+                failedPost.failed = true;
+
+                ArrayList<PostModel> emptyReplies = new ArrayList<>();
+                emptyReplies.add(failedPost);
+                thread.replyIds.put(replyId, emptyReplies);
             }
         }
     }
