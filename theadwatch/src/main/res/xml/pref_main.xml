@@ -39,6 +39,9 @@
             android:defaultValue="true"
             android:key="pref_notify_vibrate"
             android:title="@string/pref_notify_vibrate" />
+        <Preference
+            android:key="pref_notify_settings"
+            android:title="@string/pref_notify_settings" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/pref_category_backup">
@@ -50,5 +53,12 @@
             android:title="@string/pref_backup_export"
             android:summary="@string/pref_backup_export_summary"
             android:key="pref_backup_export" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/pref_category_reset">
+        <Preference
+            android:title="@string/pref_reset_clear"
+            android:summary="@string/pref_reset_clear_summary"
+            android:key="pref_reset_clear" />
     </PreferenceCategory>
 </PreferenceScreen>

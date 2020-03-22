@@ -13,10 +13,11 @@ import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AlertDialog;
 import android.view.MenuItem;
 import android.widget.Toast;
+
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -154,8 +155,29 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                     .getString(R.string.pref_notify_vibrate_disabled));
             } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 vibratePref.setEnabled(false);
+                vibratePref.setSelectable(true);
                 vibratePref.setSummary(R.string.pref_notify_vibrate_sysmanaged);
             }
+
+            final Preference openNotificationSettingsPref = findPreference("pref_notify_settings");
+            openNotificationSettingsPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    Intent intent = new Intent();
+                    intent.setAction("android.settings.APP_NOTIFICATION_SETTINGS");
+
+                    //for Android 5-7
+                    intent.putExtra("app_package", getActivity().getPackageName());
+                    intent.putExtra("app_uid", getActivity().getApplicationInfo().uid);
+
+                    // for Android 8 and above
+                    intent.putExtra("android.provider.extra.APP_PACKAGE",
+                            getActivity().getPackageName());
+
+                    startActivity(intent);
+                    return false;
+                }
+            });
 
             final Preference importPreference = findPreference("pref_backup_import");
             importPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
@@ -175,11 +197,36 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 }
             });
 
-            // Disable export if you don't have any threads to export
+            final Preference clearPreference = findPreference("pref_reset_clear");
+            clearPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(final Preference preference) {
+                    AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity());
+                    dialog.setTitle(R.string.pref_reset_clear_confirm_title);
+                    dialog.setMessage(R.string.pref_reset_clear_confirm);
+                    dialog.setNeutralButton(R.string.pref_reset_clear, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            ThreadDataManager.updateThreadList(getActivity(), new ArrayList<ThreadModel>());
+                            Toast.makeText(getActivity(),
+                                getString(R.string.pref_reset_clear_success),
+                                Toast.LENGTH_SHORT).show();
+                            getActivity().finish();
+                        }
+                    });
+                    dialog.create();
+                    dialog.show();
+                    return false;
+                }
+            });
+
+            // Disable export and clear if you don't have any threads to export
             final ArrayList<ThreadModel> threads = ThreadDataManager.getThreadList(getActivity());
             if (threads.size() == 0) {
                 exportPreference.setEnabled(false);
                 exportPreference.setSummary(R.string.pref_backup_export_disabled);
+                clearPreference.setEnabled(false);
+                clearPreference.setSummary(R.string.pref_reset_clear_disabled);
             }
         }
 
@@ -292,6 +339,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                             Toast.makeText(SettingsFragment.this.getActivity(),
                                     resources.getString(R.string.pref_backup_import_success),
                                     Toast.LENGTH_SHORT).show();
+                            getActivity().finish();
                         }
                     });
                     dialog.create();

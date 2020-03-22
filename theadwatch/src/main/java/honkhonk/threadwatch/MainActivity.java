@@ -20,11 +20,6 @@ import android.os.Handler;
 import android.os.SystemClock;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
-import com.google.android.material.snackbar.Snackbar;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.SpannableString;
 import android.text.TextWatcher;
@@ -50,6 +45,13 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
+import com.google.android.material.snackbar.Snackbar;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -70,7 +72,6 @@ public class MainActivity extends AppCompatActivity
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d(TAG, "Threads were updated!");
-            //boolean fetchSucceeded = intent.getBooleanExtra(Common.FETCH_JOB_SUCCEEDED_KEY, false);
 
             swipeContainer.setRefreshing(false);
             listView.animate().alpha(1.0f).setDuration(fadeDuration);
@@ -119,8 +120,6 @@ public class MainActivity extends AppCompatActivity
         previewWebView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageFinished(WebView view, String url) {
-                //view.scrollTo(0, view.getContentHeight());
-                //view.pageDown(true);
                 ProgressBar spinner = view.findViewById(R.id.previewSpinner);
                 spinner.setVisibility(ProgressBar.GONE);
             }
@@ -176,12 +175,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
-        //saveData();
-    }
-
-    @Override
     protected void onResume() {
         super.onResume();
 
@@ -193,7 +186,6 @@ public class MainActivity extends AppCompatActivity
         ThreadDataManager.clearUpdatedThreads(this);
     }
 
-
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -203,26 +195,28 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == Common.SETTINGS_CLOSED_ID) {
-            final boolean shouldRefresh = (data != null) &&
-                    data.getBooleanExtra(Common.SETTINGS_CLOSED_SHOULD_REFRESH, false);
-            final int previousRefreshRate = refreshRate;
+        if (requestCode != Common.SETTINGS_CLOSED_ID) {
+            return;
+        }
 
-            // Update refresh rate
-            final SharedPreferences appSettings =
-                    PreferenceManager.getDefaultSharedPreferences(this);
+        final boolean shouldRefresh = (data != null) &&
+                data.getBooleanExtra(Common.SETTINGS_CLOSED_SHOULD_REFRESH, false);
+        final int previousRefreshRate = refreshRate;
 
-            final String refreshValue = appSettings.getString("pref_refresh_rate", "5");
-            if (refreshValue.length() > 0) {
-                refreshRate = Integer.parseInt(refreshValue);
-            }
+        // Update refresh rate
+        final SharedPreferences appSettings =
+                PreferenceManager.getDefaultSharedPreferences(this);
 
-            // Update job if refresh rate changed or an import occurred
-            if ((previousRefreshRate != refreshRate && refreshRate > 0) || shouldRefresh) {
-                FetcherJobService.scheduleFetcherJobService(this, false);
-            } else if (refreshRate == 0){
-                FetcherJobService.stopFetcher(this);
-            }
+        final String refreshValue = appSettings.getString("pref_refresh_rate", "5");
+        if (refreshValue.length() > 0) {
+            refreshRate = Integer.parseInt(refreshValue);
+        }
+
+        // Update job if refresh rate changed or an import occurred
+        if ((previousRefreshRate != refreshRate && refreshRate > 0) || shouldRefresh) {
+            FetcherJobService.scheduleFetcherJobService(this, false);
+        } else if (refreshRate == 0){
+            FetcherJobService.stopFetcher(this);
         }
     }
 
@@ -267,8 +261,6 @@ public class MainActivity extends AppCompatActivity
             case R.id.menu_help:
                 showHelp();
                 return true;
-//            case R.id.menu_about:
-//                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }

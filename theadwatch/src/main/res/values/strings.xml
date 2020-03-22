@@ -75,6 +75,7 @@
     <string name="pref_notify_vibrate_sysmanaged">
         Manage notification vibration in the Android notification settings!
     </string>
+    <string name="pref_notify_settings">Open Notification Settings</string>
 
     <string name="pref_backup_import">Import</string>
     <string name="pref_backup_export">Export</string>
@@ -91,6 +92,17 @@
     <string name="pref_backup_export_ok_toast">Export backup file OK!</string>
     <string name="pref_backup_export_fail_toast">Export backup file failed!</string>
     <string name="pref_backup_export_disabled">You don\'t have any watched threads to export.</string>
+
+    <string name="pref_category_reset">Reset</string>
+    <string name="pref_reset_clear">Clear</string>
+    <string name="pref_reset_clear_summary">Clear out all threads in the list.</string>
+    <string name="pref_reset_clear_confirm_title">Clear All Threads</string>
+    <string name="pref_reset_clear_confirm">
+        Are you sure you want to clear out all the threads in the list?
+        This cannot be undone unless you have a backup!
+    </string>
+    <string name="pref_reset_clear_disabled">You don\'t have any watched threads to clear.</string>
+    <string name="pref_reset_clear_success">Watched threads cleared!</string>
 
     <string name="notification_channel_name_updated_thread">Thread Updated</string>
     <string name="notification_channel_desc_updated_thread">New posts in a thread</string>
