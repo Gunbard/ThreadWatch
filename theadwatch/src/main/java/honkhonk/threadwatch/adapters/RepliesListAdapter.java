@@ -86,7 +86,7 @@ public class RepliesListAdapter extends BaseExpandableListAdapter {
         View view = (convertView != null) ? convertView :
                 layoutInflater.inflate(R.layout.reply_group_item, null);
 
-        view.setBackgroundColor(ContextCompat.getColor(context, R.color.colorArchivedThread));
+        view.setBackgroundColor(ContextCompat.getColor(context, R.color.colorTrackedReplyGroup));
 
         Object[] keys = replyData.keySet().toArray();
         String currentKey = (String)keys[groupPosition];
