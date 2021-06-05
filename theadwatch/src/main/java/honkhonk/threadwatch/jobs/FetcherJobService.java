@@ -128,6 +128,15 @@ public class FetcherJobService extends JobService implements ThreadsRetriever.Th
         int newThreadCount = 0;
         for (final ThreadModel thread : threads) {
             if (thread.newReplyCount > 0 && !thread.disabled && thread.replyCountDelta > 0) {
+                // Bypass notification if user only cares about (You)s, but
+                // only if there are (You)s/tracked replies. Otherwise, no notifications will come
+                // through since the user isn't tracking any replies.
+                if (!thread.replyIds.isEmpty() &&
+                    (thread.notifyOnlyIfRepliesToYou && !thread.newRepliesToYou))
+                {
+                    continue;
+                }
+
                 updatedThreadsText.append(thread.getTruncatedTitle());
                 updatedThreadsText.append(" (+");
 
@@ -153,7 +162,8 @@ public class FetcherJobService extends JobService implements ThreadsRetriever.Th
         // Save for persistence
         ThreadDataManager.setUpdatedThreads(this, updatedThreads);
 
-        if (updatedThreads.size() == 0) {
+        // Only notify if the notification was populated
+        if (updatedThreads.size() == 0 || newThreadCount == 0) {
             return;
         }
 

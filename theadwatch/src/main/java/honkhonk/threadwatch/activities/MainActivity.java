@@ -297,6 +297,12 @@ public class MainActivity extends AppCompatActivity
                 getResources().getString(R.string.thread_menu_enabled);
         toggleItem.setTitle(toggleText);
 
+        MenuItem youToggleItem = menu.findItem(R.id.thread_menu_notify_you_toggle);
+        final String youToggleText = thread.notifyOnlyIfRepliesToYou ?
+                getResources().getString(R.string.thread_menu_notify_you_enabled) :
+                getResources().getString(R.string.thread_menu_notify_you_disabled);
+        youToggleItem.setTitle(youToggleText);
+
         // Set delete button color
         MenuItem deleteButton = menu.findItem(R.id.thread_menu_delete);
         SpannableString s = new SpannableString(deleteButton.getTitle());
@@ -316,6 +322,11 @@ public class MainActivity extends AppCompatActivity
                 return true;
             case R.id.thread_menu_notify_toggle:
                 thread.disabled = !thread.disabled;
+                ThreadDataManager.updateThread(MainActivity.this, thread);
+                refreshList();
+                return true;
+            case R.id.thread_menu_notify_you_toggle:
+                thread.notifyOnlyIfRepliesToYou = !thread.notifyOnlyIfRepliesToYou;
                 ThreadDataManager.updateThread(MainActivity.this, thread);
                 refreshList();
                 return true;
@@ -711,8 +722,8 @@ public class MainActivity extends AppCompatActivity
         String replyId = null;
         String urlFragment = url.getEncodedFragment();
         if (urlFragment != null) {
-            // Discard first letter, which can be a 'p' or 'q'
-            replyId = urlFragment.substring(1);
+            // Discard non-numbers since the first letter can be a 'p' or 'q'
+            replyId = urlFragment.replaceAll("\\D+","");
         }
 
         final int dupeThreadIndex = getThreadIndex(board, id);

@@ -92,6 +92,11 @@ public class ThreadModel {
     public boolean newRepliesToYou;
 
     /**
+     * Whether or not to notify only if the thread has new replies to (you)
+     */
+    public boolean notifyOnlyIfRepliesToYou;
+
+    /**
      * The UNIX timestamp (in seconds) of when the thread was made
      */
     public long time;

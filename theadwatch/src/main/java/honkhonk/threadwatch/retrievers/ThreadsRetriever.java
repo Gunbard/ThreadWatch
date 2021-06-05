@@ -220,9 +220,17 @@ public class ThreadsRetriever implements PostsRetriever.PostsRetrieverListener {
         // Mark posts that weren't found
         for (String replyId : thread.replyIds.keySet()) {
             ArrayList<PostModel> replyComments = thread.replyIds.get(replyId);
-            if (replyComments == null || replyComments.size() == 0) {
+
+            int postNumber = 0;
+            try {
+                postNumber = Integer.parseInt(replyId);
+            } catch (NumberFormatException e) {
+                Log.i(TAG, String.format("Reply Id (%s) was not a post number!", replyId));
+            }
+
+            if (postNumber != 0 && replyComments == null || replyComments.size() == 0) {
                 PostModel failedPost = new PostModel();
-                failedPost.number = Integer.parseInt(replyId);
+                failedPost.number = postNumber;
                 failedPost.comment = context.getString(R.string.reply_not_found);
                 failedPost.failed = true;
 
