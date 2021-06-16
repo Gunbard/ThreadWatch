@@ -539,7 +539,14 @@ public class MainActivity extends AppCompatActivity
         Animation anim = AnimationUtils.loadAnimation(MainActivity.this,
                 android.R.anim.slide_out_right);
         anim.setDuration(fadeDuration);
-        listView.getChildAt(position).startAnimation(anim);
+
+        final View row = listView.getChildAt(position);
+        if (row != null) {
+            row.startAnimation(anim);
+        } else {
+            Log.e(TAG, "Row to delete doesn't exist for some reason!");
+            return;
+        }
 
         new Handler().postDelayed(new Runnable() {
             public void run() {

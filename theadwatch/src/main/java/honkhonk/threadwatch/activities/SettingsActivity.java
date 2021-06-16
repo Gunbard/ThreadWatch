@@ -319,7 +319,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
             // Parse backup data to validate
             try {
-                final ArrayList<ThreadModel>backedUpThreads = (new Gson()).fromJson(backupDataAsString,
+                final ArrayList<ThreadModel> backedUpThreads = (new Gson()).fromJson(backupDataAsString,
                         new TypeToken<ArrayList<ThreadModel>>() {}.getType());
                 if (backedUpThreads.size() == 0) {
                     restoreFailed = true;
