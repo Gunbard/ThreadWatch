@@ -25,11 +25,26 @@ import honkhonk.threadwatch.models.ThreadModel;
  * Created by Gunbard on 10/11/2016.
  */
 
-public class PostsRetriever {
+public class PostsRetriever implements ThumbnailRetriever.ThumbnailRetrieverListener {
     /**
      * List of listeners to notify about retrieval events
      */
     private ArrayList<PostsRetrieverListener> listeners = new ArrayList<>();
+
+    /**
+     * Cached context
+     */
+    private Context context;
+
+    /**
+     * Cached response
+     */
+    private PostsResponse response;
+
+    /**
+     * The current thread this post retrieval is for
+     */
+    private ThreadModel thread;
 
     /**
      * Retrieval events
@@ -67,6 +82,9 @@ public class PostsRetriever {
      * @param thread The thread to retrieve posts from. Must have the board and id set.
      */
     public void retrievePosts(final Context context, final ThreadModel thread) {
+        this.context = context;
+        this.thread = thread;
+
         ConnectivityManager cm =
                 (ConnectivityManager) context
                         .getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -90,17 +108,21 @@ public class PostsRetriever {
                 (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        thread.notFound = false;
-
-                        final PostsResponse postsResponse =
+                        PostsRetriever.this.thread.notFound = false;
+                        PostsRetriever.this.response =
                                 (new Gson()).fromJson(response.toString(), PostsResponse.class);
 
-                        for (final PostsRetrieverListener listener : listeners) {
-                            if (postsResponse.posts != null) {
-                                listener.postsRetrieved(context, thread, postsResponse.posts);
-                            } else {
-                                listener.postsRetrievalFailed(context, thread);
-                            }
+                        PostsRetriever.this.thread.attachmentId =
+                                PostsRetriever.this.response.posts.get(0).attachmentId;
+
+                        // Try to get OP thumbnail, too, if needed
+                        if (PostsRetriever.this.thread.thumbnail == null) {
+                            ThumbnailRetriever thumbnailRetriever = new ThumbnailRetriever();
+                            thumbnailRetriever.addListener(PostsRetriever.this);
+                            thumbnailRetriever.retrieveThumbnail(context, PostsRetriever.this.thread);
+                        } else {
+                            thumbnailRetrievalFinished(PostsRetriever.this.thread,
+                                    PostsRetriever.this.thread.thumbnail);
                         }
                     }
                 }, new Response.ErrorListener() {
@@ -109,7 +131,7 @@ public class PostsRetriever {
                         if (error != null &&
                             error.networkResponse != null &&
                             error.networkResponse.statusCode == 404) {
-                            thread.notFound = true;
+                            PostsRetriever.this.thread.notFound = true;
                         }
 
                         for (final PostsRetrieverListener listener : listeners) {
@@ -119,5 +141,21 @@ public class PostsRetriever {
                 });
 
         ThreadWatch.getInstance(context).addToRequestQueue(retrieveRequest);
+    }
+
+    /****************************************
+     * ThumbnailRetriever.ThumbnailRetrieverListener
+     ****************************************/
+    @Override
+    public void thumbnailRetrievalFinished(final ThreadModel thread, final String encodedImage) {
+        this.thread.thumbnail = encodedImage;
+
+        for (final PostsRetrieverListener listener : listeners) {
+            if (response.posts != null) {
+                listener.postsRetrieved(context, this.thread, response.posts);
+            } else {
+                listener.postsRetrievalFailed(context, this.thread);
+            }
+        }
     }
 }

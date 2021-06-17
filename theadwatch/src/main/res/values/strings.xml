@@ -86,6 +86,9 @@
         <item>-1</item>
     </string-array>
 
+    <string name="pref_category_view">View</string>
+    <string name="pref_category_show_thumbnails">Show OP Thumbnails</string>
+
     <string name="pref_category_notifications">Notifications</string>
     <string name="pref_notify_vibrate">Vibrate</string>
     <string name="pref_notify_vibrate_disabled">Your device cannot vibrate!</string>

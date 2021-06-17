@@ -2,6 +2,7 @@
 
 
 <RelativeLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="64dp"
     xmlns:android="http://schemas.android.com/apk/res/android">
@@ -13,53 +14,60 @@
         android:id="@+id/itemBackground"
         android:alpha="0" />
 
+    <ImageView
+        android:id="@+id/thumbnailView"
+        android:layout_width="48dp"
+        android:layout_height="64dp"
+        android:layout_toRightOf="@id/boardTitle"
+        android:padding="4dp"
+        tools:srcCompat="@tools:sample/backgrounds/scenic" />
+
     <TextView
-        android:layout_height="match_parent"
         android:id="@+id/boardTitle"
+        android:layout_width="70sp"
+        android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentEnd="false"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:textSize="@dimen/add_thread_input_padding"
-        android:gravity="center"
-        android:padding="8dp"
-        android:layout_alignParentEnd="false"
-        android:layout_alignParentLeft="true"
-        android:text="/news/"
-        android:maxLines="1"
         android:clickable="false"
         android:contextClickable="true"
-        android:layout_width="70sp" />
-
-    <TextView
-        android:layout_alignParentTop="false"
-        android:id="@+id/threadTitle"
-        android:layout_alignParentEnd="false"
-        android:layout_height="match_parent"
-        android:textColor="?android:attr/textColorPrimary"
-        android:textSize="18sp"
-        android:layout_centerInParent="false"
-        android:ellipsize="end"
-        android:padding="4dp"
-        android:maxLines="2"
-        android:gravity="left|center_vertical"
-        android:text="@string/refresh_for_thread_data"
-        android:layout_toRightOf="@+id/boardTitle"
-        android:layout_width="wrap_content"
-        android:layout_toLeftOf="@+id/newPosts"
-        android:clickable="false"
-        android:hyphenationFrequency="none" />
-
-    <TextView
-        android:text="(408)"
-        android:layout_height="match_parent"
-        android:id="@+id/newPosts"
-        android:layout_alignParentEnd="false"
         android:gravity="center"
-        android:layout_alignParentTop="false"
-        android:layout_alignParentRight="true"
+        android:maxLines="1"
+        android:text="/news/"
+        android:textSize="@dimen/add_thread_input_padding" />
+
+    <TextView
+        android:id="@+id/threadTitle"
         android:layout_width="wrap_content"
-        android:padding="16dp"
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="false"
+        android:layout_alignParentEnd="false"
+        android:layout_centerInParent="false"
+        android:layout_toLeftOf="@id/newPosts"
+        android:layout_toRightOf="@id/thumbnailView"
         android:clickable="false"
-        android:maxLines="1" />
+        android:ellipsize="end"
+        android:gravity="left|center_vertical"
+        android:hyphenationFrequency="none"
+        android:maxLines="2"
+        android:padding="8dp"
+        android:text="@string/refresh_for_thread_data"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/newPosts"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="false"
+        android:layout_alignParentEnd="false"
+        android:layout_alignParentRight="true"
+        android:clickable="false"
+        android:gravity="center"
+        android:maxLines="1"
+        android:padding="14dp"
+        android:text="(4080)" />
 
 </RelativeLayout>
 

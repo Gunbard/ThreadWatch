@@ -96,6 +96,7 @@ public class ThreadsRetriever implements PostsRetriever.PostsRetrieverListener {
         thread.comment = op.comment;
         thread.subject = op.subject;
         thread.time = op.time;
+        thread.attachmentId = op.attachmentId;
         thread.newReplyCount = op.replyCount - thread.replyCount;
         thread.replyCountDelta += (thread.firstRefresh) ? 0 : thread.newReplyCount;
         thread.replyCount = op.replyCount;
@@ -189,7 +190,7 @@ public class ThreadsRetriever implements PostsRetriever.PostsRetrieverListener {
      * @param thread The thread to check
      * @param posts The posts in the thread
      */
-    private void retrieveReplyComments(Context context, ThreadModel thread, final ArrayList<PostModel> posts) {
+    private void retrieveReplyComments(final Context context, ThreadModel thread, final ArrayList<PostModel> posts) {
         if (thread.replyIds.isEmpty()) {
             return;
         }

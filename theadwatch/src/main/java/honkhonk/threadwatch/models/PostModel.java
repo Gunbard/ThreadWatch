@@ -70,6 +70,13 @@ public class PostModel {
     public int time;
 
     /**
+     * The UNIX timestamp (including microtime) of when an image was uploaded.
+     * Used as the id for an attachment/image.
+     */
+    @SerializedName("tim")
+    public long attachmentId;
+
+    /**
      * Post does not exist or was deleted
      */
     public boolean failed;

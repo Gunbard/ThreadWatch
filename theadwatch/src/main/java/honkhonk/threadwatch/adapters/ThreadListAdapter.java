@@ -1,10 +1,16 @@
 package honkhonk.threadwatch.adapters;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.preference.PreferenceManager;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.IdRes;
@@ -65,6 +71,23 @@ public class ThreadListAdapter extends ArrayAdapter<ThreadModel> {
 
         final TextView boardName = view.findViewById(R.id.boardTitle);
         boardName.setText("/" + thread.board + "/");
+
+        final SharedPreferences appSettings =
+                PreferenceManager.getDefaultSharedPreferences((Context) this.context);
+
+        final boolean showThumbnails = appSettings.getBoolean("pref_view_thumbnails", true);
+
+        final ImageView thumbnailView = view.findViewById(R.id.thumbnailView);
+        if (thread.thumbnail != null && showThumbnails) {
+            byte[] decodedString = Base64.decode(thread.thumbnail, Base64.DEFAULT);
+            Bitmap decodedImage = BitmapFactory.decodeByteArray(decodedString, 0,
+                    decodedString.length);
+            thumbnailView.setImageBitmap(decodedImage);
+            thumbnailView.setVisibility(View.VISIBLE);
+
+        } else {
+            thumbnailView.setVisibility(View.GONE);
+        }
 
         final TextView title = view.findViewById(R.id.threadTitle);
         final String titleText = thread.getTitle();

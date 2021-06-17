@@ -117,6 +117,16 @@ public class ThreadModel {
     public long lastPostId;
 
     /**
+     * The UNIX timestamp + microtime of the OP attachment/image
+     */
+    public long attachmentId;
+
+    /**
+     * Base64 encoded string of OP's image as a JPEG thumbnail, if it exists
+     */
+    public String thumbnail;
+
+    /**
      * List of reply ids to track using the post number as the key and the value
      * as a list of comment strings that reference it
      */
@@ -187,7 +197,6 @@ public class ThreadModel {
     public boolean isAvailable() {
         return !(closed || archived || disabled || notFound);
     }
-
 
     @Override
     public int hashCode()

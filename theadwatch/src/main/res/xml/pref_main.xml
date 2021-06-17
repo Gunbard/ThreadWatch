@@ -33,6 +33,14 @@
             android:title="@string/pref_title_vibrate" />-->
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="@string/pref_category_view">
+        <SwitchPreference
+            android:checked="true"
+            android:defaultValue="true"
+            android:key="pref_view_thumbnails"
+            android:title="@string/pref_category_show_thumbnails" />
+    </PreferenceCategory>
+
     <PreferenceCategory android:title="@string/pref_category_notifications">
         <SwitchPreference
             android:checked="true"
