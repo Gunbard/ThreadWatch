@@ -127,6 +127,11 @@ public class ThreadModel {
     public String thumbnail;
 
     /**
+     * The current page index the thread is on
+     */
+    public int currentPage;
+
+    /**
      * List of reply ids to track using the post number as the key and the value
      * as a list of comment strings that reference it
      */

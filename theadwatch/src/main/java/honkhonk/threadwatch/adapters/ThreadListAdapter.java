@@ -21,6 +21,7 @@ import androidx.core.content.ContextCompat;
 import java.util.ArrayList;
 
 import honkhonk.threadwatch.R;
+import honkhonk.threadwatch.helpers.Common;
 import honkhonk.threadwatch.models.ThreadModel;
 
 /**
@@ -103,6 +104,13 @@ public class ThreadListAdapter extends ArrayAdapter<ThreadModel> {
             newPosts.setText("(" + thread.replyCountDelta + ")") ;
         } else {
             newPosts.setText("");
+        }
+
+        final TextView lastPageWarningText = view.findViewById(R.id.lastPageWarning);
+        if (thread.currentPage >= Common.LAST_PAGE) {
+            lastPageWarningText.setVisibility(View.VISIBLE);
+        } else {
+            lastPageWarningText.setVisibility(View.GONE);
         }
 
         if (thread.newRepliesToYou) {

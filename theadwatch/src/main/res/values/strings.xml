@@ -136,6 +136,9 @@
     <string name="info_latest">Latest %1s ago on:\n%2s</string>
     <string name="info_stats">Replies: %1d | Images: %2d</string>
 
+    <string name="last_page_warning">[LAST PAGE WARNING!]</string>
+    <string name="last_page_warning_indicator">[ ! ]</string>
+
     <string name="help_summary">
         Add new threads by sharing a link (e.g. https://boards.4channel.org/5/thread/123456) to ThreadWatch.
         You can use your favorite browser\'s share feature while viewing a thread.
@@ -143,6 +146,7 @@
         \n\nTap the bell icon to toggle showing notifications.
         ThreadWatch will continue to refresh as long the refresh rate is not \"Never\".
         Swipe down on the list to refresh immediately.
+        \n\nLast Page Warning: This will display if a thread will be deleted or archived soon.
         \n\nI\'d just like to interject, but this will always be free and open source software.
     </string>
 

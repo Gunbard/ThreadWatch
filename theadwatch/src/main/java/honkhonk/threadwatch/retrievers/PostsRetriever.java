@@ -21,11 +21,14 @@ import honkhonk.threadwatch.models.PostsResponse;
 import honkhonk.threadwatch.models.ThreadModel;
 
 /**
- * Retrieves all posts from a thread
+ * Retrieves all posts from a thread, and then tries to retrieve the first post thumbnail
+ * and the page the thread is on, in that order.
+ * TODO: Multithread these requests out
  * Created by Gunbard on 10/11/2016.
  */
 
-public class PostsRetriever implements ThumbnailRetriever.ThumbnailRetrieverListener {
+public class PostsRetriever implements ThumbnailRetriever.ThumbnailRetrieverListener,
+        PageDataRetriever.PageDataRetrieverListener {
     /**
      * List of listeners to notify about retrieval events
      */
@@ -144,12 +147,24 @@ public class PostsRetriever implements ThumbnailRetriever.ThumbnailRetrieverList
         ThreadWatch.getInstance(context).addToRequestQueue(retrieveRequest);
     }
 
-    /****************************************
+    /***********************************************
      * ThumbnailRetriever.ThumbnailRetrieverListener
-     ****************************************/
+     ***********************************************/
     @Override
     public void thumbnailRetrievalFinished(final ThreadModel thread, final String encodedImage) {
         this.thread.thumbnail = encodedImage;
+
+        PageDataRetriever pageDataRetriever = new PageDataRetriever();
+        pageDataRetriever.addListener(this);
+        pageDataRetriever.retrievePageData(context, this.thread);
+    }
+
+    /***********************************************
+     * PageDataRetriever.PageDataRetrieverListener
+     ***********************************************/
+    @Override
+    public void pageDataRetrievalFinished(final ThreadModel thread, final int pageNumber) {
+        this.thread.currentPage = pageNumber;
 
         for (final PostsRetrieverListener listener : listeners) {
             if (response.posts != null) {
