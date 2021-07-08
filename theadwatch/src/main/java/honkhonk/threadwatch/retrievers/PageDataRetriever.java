@@ -8,10 +8,10 @@ import android.util.Log;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.google.gson.Gson;
 
-import org.json.JSONObject;
+import org.json.JSONArray;
 
 import java.util.ArrayList;
 
@@ -25,7 +25,7 @@ public class PageDataRetriever {
     private ArrayList<PageDataRetrieverListener> listeners = new ArrayList<>();
 
     public interface PageDataRetrieverListener {
-        void pageDataRetrievalFinished(final ThreadModel thread, int pageNumber);
+        void pageDataRetrievalFinished(final ThreadModel thread, final int pageNumber);
     }
 
     public void addListener(final PageDataRetrieverListener listener) {
@@ -52,10 +52,10 @@ public class PageDataRetriever {
         final String url =
                 "https://a.4cdn.org/"+ thread.board + "/threads.json";
 
-        final JsonObjectRequest retrieveRequest = new JsonObjectRequest
-            (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+        final JsonArrayRequest retrieveRequest = new JsonArrayRequest
+            (Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
                 @Override
-                public void onResponse(JSONObject response) {
+                public void onResponse(JSONArray response) {
                     PageDataResponse[] pageDataResponse =
                         (new Gson()).fromJson(response.toString(), PageDataResponse[].class);
 
