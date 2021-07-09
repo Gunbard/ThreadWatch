@@ -164,7 +164,6 @@ public class PostsRetriever implements ThumbnailRetriever.ThumbnailRetrieverList
     @Override
     public void pageDataRetrievalFinished(final ThreadModel thread, final int pageNumber) {
         this.thread.currentPage = pageNumber;
-        Log.d("asdfasdf %s", Integer.toString(pageNumber));
 
         for (final PostsRetrieverListener listener : listeners) {
             if (response.posts != null) {
@@ -174,5 +173,4 @@ public class PostsRetriever implements ThumbnailRetriever.ThumbnailRetrieverList
             }
         }
     }
-
 }
