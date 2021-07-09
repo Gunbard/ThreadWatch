@@ -140,6 +140,7 @@ public class PostsRetriever implements ThumbnailRetriever.ThumbnailRetrieverList
                     }
                 });
 
+        retrieveRequest.setShouldCache(false);
         ThreadWatch.getInstance(context).addToRequestQueue(retrieveRequest);
     }
 
