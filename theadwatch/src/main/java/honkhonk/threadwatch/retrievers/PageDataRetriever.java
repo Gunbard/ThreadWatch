@@ -81,6 +81,7 @@ public class PageDataRetriever {
                 }
             });
 
+        retrieveRequest.setShouldCache(false);
         ThreadWatch.getInstance(context).addToRequestQueue(retrieveRequest);
     }
 }
