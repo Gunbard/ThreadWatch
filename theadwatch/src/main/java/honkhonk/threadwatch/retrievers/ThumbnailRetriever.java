@@ -109,6 +109,7 @@ public class ThumbnailRetriever {
                     }
                 });
 
+        retrieveRequest.setShouldCache(false);
         ThreadWatch.getInstance(context).addToRequestQueue(retrieveRequest);
     }
 }

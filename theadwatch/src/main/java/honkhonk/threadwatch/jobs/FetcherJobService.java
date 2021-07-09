@@ -20,8 +20,8 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import honkhonk.threadwatch.activities.MainActivity;
 import honkhonk.threadwatch.R;
+import honkhonk.threadwatch.activities.MainActivity;
 import honkhonk.threadwatch.helpers.Common;
 import honkhonk.threadwatch.managers.PreferencesDataManager;
 import honkhonk.threadwatch.managers.ThreadDataManager;
@@ -34,8 +34,6 @@ public class FetcherJobService extends JobService implements ThreadsRetriever.Th
 
     public static void scheduleFetcherJobService(Context context, boolean noWait) {
         JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
-        jobScheduler.cancel(FETCHER_JOB_ID);
-
         ComponentName serviceComponent = new ComponentName(context, FetcherJobService.class);
         JobInfo.Builder builder = new JobInfo.Builder(FETCHER_JOB_ID, serviceComponent);
 
@@ -53,6 +51,7 @@ public class FetcherJobService extends JobService implements ThreadsRetriever.Th
             }
 
             if (refreshRate < 1) {
+                sendRefreshFinishedBroadcast(context);
                 return;
             }
 
@@ -66,8 +65,8 @@ public class FetcherJobService extends JobService implements ThreadsRetriever.Th
 
     public static Boolean fetcherIsScheduled(Context context) {
         JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
-        for ( JobInfo jobInfo : jobScheduler.getAllPendingJobs() ) {
-            if ( jobInfo.getId() == FETCHER_JOB_ID ) {
+        for (JobInfo jobInfo : jobScheduler.getAllPendingJobs()) {
+            if (jobInfo.getId() == FETCHER_JOB_ID) {
                 return true;
             }
         }
@@ -99,11 +98,8 @@ public class FetcherJobService extends JobService implements ThreadsRetriever.Th
 
     @Override
     public void threadsRetrieved(final ArrayList<ThreadModel> threads) {
-        Intent fetchFinishedIntent = new Intent(Common.FETCH_JOB_BROADCAST_KEY);
-        fetchFinishedIntent.putExtra(Common.FETCH_JOB_SUCCEEDED_KEY, true);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(fetchFinishedIntent);
-
         if (threads.size() == 0) {
+            sendRefreshFinishedBroadcast(this);
             return;
         }
 
@@ -120,6 +116,7 @@ public class FetcherJobService extends JobService implements ThreadsRetriever.Th
         }
 
         if (!threadWasUpdated || !PreferencesDataManager.notificationsEnabled(this)) {
+            sendRefreshFinishedBroadcast(this);
             return;
         }
 
@@ -170,6 +167,7 @@ public class FetcherJobService extends JobService implements ThreadsRetriever.Th
 
         // Only notify if the notification was populated
         if (updatedThreads.size() == 0 || newThreadCount == 0) {
+            sendRefreshFinishedBroadcast(this);
             return;
         }
 
@@ -212,6 +210,7 @@ public class FetcherJobService extends JobService implements ThreadsRetriever.Th
         // Builds the notification and issues it.
         builder.setAutoCancel(true);
         notificationManager.notify(Common.NOTIFICATION_ID, builder.build());
+        sendRefreshFinishedBroadcast(this);
     }
     @Override
     public void threadRetrievalFailed(final ArrayList<ThreadModel> threads) {
@@ -229,5 +228,11 @@ public class FetcherJobService extends JobService implements ThreadsRetriever.Th
         ThreadsRetriever threadsRetriever = new ThreadsRetriever();
         threadsRetriever.addListener(this);
         threadsRetriever.retrieveThreadData(this, threadList);
+    }
+
+    private static void sendRefreshFinishedBroadcast(final Context context) {
+        Intent fetchFinishedIntent = new Intent(Common.FETCH_JOB_BROADCAST_KEY);
+        fetchFinishedIntent.putExtra(Common.FETCH_JOB_SUCCEEDED_KEY, true);
+        LocalBroadcastManager.getInstance(context).sendBroadcast(fetchFinishedIntent);
     }
 }
