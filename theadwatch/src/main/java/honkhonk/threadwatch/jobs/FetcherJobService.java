@@ -34,6 +34,8 @@ public class FetcherJobService extends JobService implements ThreadsRetriever.Th
 
     public static void scheduleFetcherJobService(Context context, boolean noWait) {
         JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+        jobScheduler.cancel(FETCHER_JOB_ID);
+
         ComponentName serviceComponent = new ComponentName(context, FetcherJobService.class);
         JobInfo.Builder builder = new JobInfo.Builder(FETCHER_JOB_ID, serviceComponent);
 
