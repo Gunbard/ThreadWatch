@@ -23,7 +23,7 @@ android:
     - sys-img-x86-android-30
 before_install:
   - chmod +x gradlew
-  - yes | sdkmanager --licenses
+  - yes | sdkmanager "platforms;android-30"
 install:
   # Skip the default install stage
   - true
