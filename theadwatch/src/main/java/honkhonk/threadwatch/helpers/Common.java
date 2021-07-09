@@ -56,4 +56,8 @@ final public class Common {
     final public static String FETCH_JOB_SUCCEEDED_KEY = "TWFetchJobSucceededKey";
 
     final public static String CHANNEL_ID = "TWNotificationChannel";
+
+    // If a thread is on this page, a deletion/archive warning will be shown.
+    // All the boards appear to have a max 10 pages at this time.
+    final public static int LAST_PAGE = 10;
 }

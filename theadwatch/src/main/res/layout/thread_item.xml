@@ -37,24 +37,50 @@
         android:text="/news/"
         android:textSize="@dimen/add_thread_input_padding" />
 
-    <TextView
-        android:id="@+id/threadTitle"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignParentTop="false"
-        android:layout_alignParentEnd="false"
-        android:layout_centerInParent="false"
-        android:layout_toLeftOf="@id/newPosts"
-        android:layout_toRightOf="@id/thumbnailView"
-        android:clickable="false"
-        android:ellipsize="end"
-        android:gravity="left|center_vertical"
-        android:hyphenationFrequency="none"
-        android:maxLines="2"
-        android:padding="8dp"
-        android:text="@string/refresh_for_thread_data"
-        android:textColor="?android:attr/textColorPrimary"
-        android:textSize="18sp" />
+        android:layout_toStartOf="@id/newPosts"
+        android:layout_toEndOf="@id/thumbnailView"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/threadTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:clickable="false"
+            android:ellipsize="end"
+            android:gravity="left|center_vertical"
+            android:hyphenationFrequency="none"
+            android:maxLines="2"
+            android:padding="4dp"
+            android:text="@string/refresh_for_thread_data"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="18sp"
+            app:autoSizeMaxTextSize="18sp"
+            app:autoSizeMinTextSize="14sp"
+            app:autoSizeTextType="uniform" />
+
+        <TextView
+            android:id="@+id/lastPageWarning"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            android:clickable="false"
+            android:ellipsize="end"
+            android:hyphenationFrequency="none"
+            android:maxLines="1"
+            android:paddingLeft="4dp"
+            android:paddingBottom="4dp"
+            android:text="@string/last_page_warning"
+            android:textAllCaps="false"
+            android:textColor="@color/colorNotFoundThread"
+            android:textSize="12sp"
+            android:textStyle="bold|italic" />
+
+    </LinearLayout>
 
     <TextView
         android:id="@+id/newPosts"

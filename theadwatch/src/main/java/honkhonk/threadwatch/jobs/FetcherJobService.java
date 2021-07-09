@@ -151,10 +151,16 @@ public class FetcherJobService extends JobService implements ThreadsRetriever.Th
                 }
 
                 if (thread.newRepliesToYou) {
-                    updatedThreadsText.append(") (You)\n");
+                    updatedThreadsText.append(") (You) ");
                 } else {
-                    updatedThreadsText.append(")\n");
+                    updatedThreadsText.append(") ");
                 }
+
+                if (thread.currentPage >= Common.LAST_PAGE) {
+                    updatedThreadsText.append(getString(R.string.last_page_warning_indicator));
+                }
+
+                updatedThreadsText.append("\n");
                 newThreadCount++;
             }
         }
