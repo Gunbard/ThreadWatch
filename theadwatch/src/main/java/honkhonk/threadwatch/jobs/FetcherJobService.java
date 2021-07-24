@@ -28,6 +28,10 @@ import honkhonk.threadwatch.managers.ThreadDataManager;
 import honkhonk.threadwatch.models.ThreadModel;
 import honkhonk.threadwatch.retrievers.ThreadsRetriever;
 
+/**
+ * Job that will actually do the work to get all thread data.
+ * This job will actually build and issue the Android notification.
+ */
 public class FetcherJobService extends JobService implements ThreadsRetriever.ThreadRetrieverListener {
     final public static String TAG = FetcherJobService.class.getSimpleName();
     final public static int FETCHER_JOB_ID = 0;
@@ -103,13 +107,20 @@ public class FetcherJobService extends JobService implements ThreadsRetriever.Th
             return;
         }
 
+        final SharedPreferences appSettings =
+                PreferenceManager.getDefaultSharedPreferences(this);
+
+        final boolean shouldNotifyAboutLastPage =
+                appSettings.getBoolean("pref_notify_on_last_page", true);
+
         Log.d(TAG, "Got thread data");
         ThreadDataManager.updateThreadList(this, threads);
         HashMap<String, Integer> updatedThreads = ThreadDataManager.getUpdatedThreads(this);
 
         boolean threadWasUpdated = false;
         for (final ThreadModel thread : threads) {
-            if (thread.newReplyCount > 0 && !thread.disabled && thread.isAvailable()) {
+            if ((thread.newReplyCount > 0 && !thread.disabled && thread.isAvailable()) ||
+                    (shouldNotifyAboutLastPage && thread.isNowOnLastPage)) {
                 threadWasUpdated = true;
                 break;
             }
@@ -124,7 +135,12 @@ public class FetcherJobService extends JobService implements ThreadsRetriever.Th
         StringBuilder updatedThreadsText = new StringBuilder();
         int newThreadCount = 0;
         for (final ThreadModel thread : threads) {
-            if (thread.newReplyCount > 0 && !thread.disabled && thread.replyCountDelta > 0) {
+            // Skip disabled threads
+            if (thread.disabled) {
+                continue;
+            }
+
+            if (thread.newReplyCount > 0 && thread.replyCountDelta > 0) {
                 // Bypass notification if user only cares about (You)s, but
                 // only if there are (You)s/tracked replies. Otherwise, no notifications will come
                 // through since the user isn't tracking any replies.
@@ -153,20 +169,29 @@ public class FetcherJobService extends JobService implements ThreadsRetriever.Th
                     updatedThreadsText.append(") ");
                 }
 
+                // This will cover autosaging where a thread will no longer bump
                 if (thread.currentPage >= Common.LAST_PAGE) {
                     updatedThreadsText.append(getString(R.string.last_page_warning_indicator));
                 }
 
                 updatedThreadsText.append("\n");
                 newThreadCount++;
+            } else if (shouldNotifyAboutLastPage && thread.isNowOnLastPage) {
+                updatedThreadsText.append(thread.getTruncatedTitle());
+                updatedThreadsText.append(" ");
+                updatedThreadsText.append(getString(R.string.last_page_warning_indicator));
+                updatedThreadsText.append("\n");
             }
         }
+
+        // Even if a thread does not have new replies, notify the user that a thread
+        // hit the last page
 
         // Save for persistence
         ThreadDataManager.setUpdatedThreads(this, updatedThreads);
 
         // Only notify if the notification was populated
-        if (updatedThreads.size() == 0 || newThreadCount == 0) {
+        if (updatedThreadsText.length() == 0) {
             sendRefreshFinishedBroadcast(this);
             return;
         }
@@ -180,8 +205,6 @@ public class FetcherJobService extends JobService implements ThreadsRetriever.Th
                         PendingIntent.FLAG_UPDATE_CURRENT
                 );
 
-        final SharedPreferences appSettings = PreferenceManager.getDefaultSharedPreferences(this);
-
         final boolean vibrateNotify = appSettings.getBoolean("pref_notify_vibrate", true);
         final Vibrator vibrator = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
         boolean canVibrate = vibrator.hasVibrator();
@@ -189,12 +212,26 @@ public class FetcherJobService extends JobService implements ThreadsRetriever.Th
         final int defaults = (vibrateNotify && canVibrate) ? NotificationCompat.DEFAULT_ALL :
                 NotificationCompat.DEFAULT_LIGHTS | NotificationCompat.DEFAULT_SOUND;
 
+        String title = "";
+        String titleText = "";
+
+        // Update titles based on what actually updated
+        if (newThreadCount == 0 && updatedThreadsText.length() > 0) {
+            // Only last page warning(s)
+            title = getString(R.string.notification_title_last_page);
+            titleText = getString(R.string.notification_title_last_page_content);
+        } else {
+            // Could be a mix of thread replies and last page warnings
+            title = getString(R.string.notification_title);
+            titleText = getString(R.string.notification_content, newThreadCount);
+        }
+
         NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(this, Common.CHANNEL_ID)
                         .setSmallIcon(R.mipmap.ic_launcher)
                         .setStyle(new NotificationCompat.BigTextStyle().bigText(updatedThreadsText.toString()))
-                        .setContentTitle(getString(R.string.notification_title))
-                        .setContentText(getString(R.string.notification_content, newThreadCount))
+                        .setContentTitle(title)
+                        .setContentText(titleText)
                         .setPriority(NotificationCompat.PRIORITY_HIGH)
                         .setDefaults(defaults)
                         .setContentIntent(resultPendingIntent);
