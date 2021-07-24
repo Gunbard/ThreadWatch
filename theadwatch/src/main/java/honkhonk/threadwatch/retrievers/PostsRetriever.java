@@ -16,6 +16,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 import honkhonk.threadwatch.ThreadWatch;
+import honkhonk.threadwatch.helpers.Common;
 import honkhonk.threadwatch.models.PostModel;
 import honkhonk.threadwatch.models.PostsResponse;
 import honkhonk.threadwatch.models.ThreadModel;
@@ -164,6 +165,8 @@ public class PostsRetriever implements ThumbnailRetriever.ThumbnailRetrieverList
      ***********************************************/
     @Override
     public void pageDataRetrievalFinished(final ThreadModel thread, final int pageNumber) {
+        this.thread.isNowOnLastPage = (pageNumber >= Common.LAST_PAGE &&
+                this.thread.currentPage < Common.LAST_PAGE);
         this.thread.currentPage = pageNumber;
 
         for (final PostsRetrieverListener listener : listeners) {

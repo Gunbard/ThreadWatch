@@ -59,6 +59,8 @@
 
     <string name="notification_title">New replies!</string>
     <string name="notification_content">New posts in %1d thread(s)</string>
+    <string name="notification_title_last_page">Last Page Warning</string>
+    <string name="notification_title_last_page_content">Thread(s) are on the last page!</string>
 
     <!-- Settings -->
 
@@ -88,6 +90,8 @@
 
     <string name="pref_category_view">View</string>
     <string name="pref_category_show_thumbnails">Show OP Thumbnails</string>
+    <string name="pref_category_notify_on_last_page">Last Page Warning</string>
+    <string name="pref_category_notify_on_last_page_details">Notify if a thread reaches the last page on a board.</string>
 
     <string name="pref_category_notifications">Notifications</string>
     <string name="pref_notify_vibrate">Vibrate</string>

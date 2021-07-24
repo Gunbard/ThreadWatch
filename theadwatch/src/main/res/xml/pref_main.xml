@@ -45,6 +45,12 @@
         <SwitchPreference
             android:checked="true"
             android:defaultValue="true"
+            android:key="pref_notify_on_last_page"
+            android:title="@string/pref_category_notify_on_last_page"
+            android:summary="@string/pref_category_notify_on_last_page_details" />
+        <SwitchPreference
+            android:checked="true"
+            android:defaultValue="true"
             android:key="pref_notify_vibrate"
             android:title="@string/pref_notify_vibrate" />
         <Preference

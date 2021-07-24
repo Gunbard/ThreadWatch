@@ -97,6 +97,11 @@ public class ThreadModel {
     public boolean notifyOnlyIfRepliesToYou;
 
     /**
+     * Whether or not the thread hit the last page on the current refresh.
+     */
+    public boolean isNowOnLastPage;
+
+    /**
      * The UNIX timestamp (in seconds) of when the thread was made
      */
     public long time;
