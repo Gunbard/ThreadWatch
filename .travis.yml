@@ -1,5 +1,6 @@
 language: android
 dist: trusty
+jdk: openjdk11
 android:
   components:
     # Uncomment the lines below if you want to
