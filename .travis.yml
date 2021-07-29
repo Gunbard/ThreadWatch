@@ -24,7 +24,7 @@ android:
     - sys-img-x86-android-30
 before_install:
   - chmod +x gradlew
-  - yes | $ANDROID_HOME/tools/bin/sdkmanager "platforms;android-30"
+  - yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-30"
 install:
   # Skip the default install stage
   - true
