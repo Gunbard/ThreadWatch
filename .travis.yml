@@ -22,11 +22,11 @@ android:
     # Specify at least one system image,
     # if you need to run emulator(s) during your tests
     - sys-img-x86-android-30
-    env:
-      global:
-        - TARGET_VERSION=30
-        - ANDROID_BUILD_TOOLS_VERSION=30.0.3
-        - ANDROID_HOME=~/android-sdk
+  env:
+    global:
+      - TARGET_VERSION=30
+      - ANDROID_BUILD_TOOLS_VERSION=30.0.3
+      - ANDROID_HOME=~/android-sdk
 before_install:
   - touch $HOME/.android/repositories.cfg
   - wget "https://dl.google.com/android/repository/commandlinetools-linux-7302050_latest.zip" -O commandlinetools.zip
