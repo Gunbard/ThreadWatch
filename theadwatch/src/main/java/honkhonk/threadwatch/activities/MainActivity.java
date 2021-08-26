@@ -314,7 +314,13 @@ public class MainActivity extends AppCompatActivity
     public boolean onContextItemSelected(MenuItem item) {
         final AdapterView.AdapterContextMenuInfo info =
                 (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-        final ThreadModel thread = listDataSource.get(info.position);
+        final ThreadModel thread;
+        try {
+            thread = listDataSource.get(info.position);
+        } catch (Exception e) {
+            Log.e(TAG, "Tried to select a non-existent menu item somehow.");
+            return true;
+        }
 
         switch (item.getItemId()) {
             case R.id.thread_menu_info:
