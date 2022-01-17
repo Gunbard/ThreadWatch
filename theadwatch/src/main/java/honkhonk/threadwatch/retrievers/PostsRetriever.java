@@ -1,8 +1,10 @@
 package honkhonk.threadwatch.retrievers;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.android.volley.Request;
@@ -120,7 +122,12 @@ public class PostsRetriever implements ThumbnailRetriever.ThumbnailRetrieverList
                                 PostsRetriever.this.response.posts.get(0).attachmentId;
 
                         // Try to get OP thumbnail, too, if needed
-                        if (PostsRetriever.this.thread.thumbnail == null) {
+                        final SharedPreferences appSettings =
+                                PreferenceManager.getDefaultSharedPreferences(context);
+                        final boolean shouldGetThumbnail =
+                                appSettings.getBoolean("pref_view_thumbnails", true);
+
+                        if (shouldGetThumbnail && PostsRetriever.this.thread.thumbnail == null) {
                             ThumbnailRetriever thumbnailRetriever = new ThumbnailRetriever();
                             thumbnailRetriever.addListener(PostsRetriever.this);
                             thumbnailRetriever.retrieveThumbnail(context, PostsRetriever.this.thread);

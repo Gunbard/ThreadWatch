@@ -79,7 +79,7 @@ public class ThumbnailRetriever {
         }
 
         final String url =
-                "https://is2.4chan.org/"+ thread.board + "/" + thread.attachmentId + "s.jpg";
+                "https://i.4cdn.org/"+ thread.board + "/" + thread.attachmentId + "s.jpg";
 
         final ImageRequest retrieveRequest = new ImageRequest(url,
                 new Response.Listener<Bitmap>() {
