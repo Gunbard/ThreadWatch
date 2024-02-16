@@ -202,7 +202,7 @@ public class FetcherJobService extends JobService implements ThreadsRetriever.Th
                         this,
                         0,
                         resultIntent,
-                        PendingIntent.FLAG_UPDATE_CURRENT
+                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
                 );
 
         final boolean vibrateNotify = appSettings.getBoolean("pref_notify_vibrate", true);
